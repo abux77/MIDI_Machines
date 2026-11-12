@@ -2,6 +2,8 @@
 
 ## Run
 
+Play online at **https://abux77.github.io/MIDI_Grids/**.
+
 From the repository root:
 
 ```sh
@@ -12,6 +14,14 @@ Visit http://localhost:8000 and press Start (or Space). No Node, npm, server bac
 account, or compiler is needed to play the checked-in build. Serve over HTTP;
 opening `index.html` as a `file://` URL cannot load WebAssembly reliably. The whole
 `web/` directory can also be served by any static HTTPS host.
+
+## GitHub Pages deployment
+
+The `Publish MIDI Grids web app` workflow publishes the checked-in `web/` folder
+when changes to that folder or the workflow are pushed to `main`. It can also be
+run manually from the repository's Actions tab. GitHub Pages uses **GitHub
+Actions** as its publishing source. No build step or external hosting is needed.
+After changing C engine code, rebuild and commit `web/grids.wasm` before pushing.
 
 ## Shared architecture
 

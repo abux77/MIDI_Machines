@@ -3,11 +3,13 @@ This is based on the Mutable Instruments Grid module. I liked the idea of it but
 
 ## Run in a browser
 
+Open [MIDI Grids online](https://abux77.github.io/MIDI_Grids/) and press **Start**.
+
 The browser app and Pico firmware share the **same C engine**, including pattern data,
 interpolation, chaos, accents, and 24-PPQN transport. The browser runs that C as
 WebAssembly; there is no separate JavaScript pattern implementation.
 
-The ready-to-run browser build is checked in. From this repository:
+The ready-to-run browser build is checked in. To serve it locally from this repository:
 
 ```sh
 python3 -m http.server 8000 --directory web --bind 127.0.0.1
