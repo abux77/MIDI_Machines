@@ -45,7 +45,7 @@ The compiled firmware is in `build/midi_grids.uf2`. Hold **BOOTSEL** while conne
 **Start/Stop**
 - Starts and stops the playing of samples and MIDI signals.
 - Holding down while booting with enter USB drive mode.
-- Holding down while stopped will allow you to pick a sample for each drum voice by turning it's knob. While turning the knob a preview of each sample will be played back. Release the button to save all of your choices to `SELECT.TXT` 
+- Holding down while stopped will allow you to pick a sample for each drum voice by turning it's knob. While turning the knob a preview of each sample will be played back. Release the button to save all of your choices to `SELECT.TXT`
 
 ## MIDI Clock and Transport
 
@@ -143,13 +143,13 @@ Lines beginning with `#` are ignored by the current parser. Put comments on thei
 
 ## Loading Samples via USB
 
-If providing your own samples they must be uncompressed PCM, **mono, 16-bit, 44,100 Hz** WAV files. Each voice can have 8 samples. Bass Drum (BD) samples are named `BD01.WAV` to  `BD02.WAV`. Snare Drum (SD) samples are named `SD01.WAV` to  `SD02.WAV`. High Hat (HH) samples are named `HH01.WAV` to  `HH02.WAV`
+If providing your own samples they must be uncompressed PCM, **mono, 16-bit, 44,100 Hz** WAV files. Each voice can have 8 samples. Bass Drum (BD) samples are named `BD01.WAV` to `BD08.WAV`. Snare Drum (SD) samples are named `SD01.WAV` to `SD08.WAV`. High Hat (HH) samples are named `HH01.WAV` to `HH08.WAV`
 
 The disk itself has 1 MiB minus filesystem overhead so you will need to be loading short samples. In addition to this all three drum samples must fit into **128 KiB** of RAM (this is about 1.49 seconds total across all three sounds).
 
 A small file can still be rejected for stereo, 8/24-bit, float/compressed encoding, a non-44100 Hz rate, or malformed/truncated WAV chunks.
 
-If you are using a Pico that previously had MicroPython installed you may need to format the 1 MB region. **An old MicroPython installation may leave incompatible data in this region**, so the first installation may need a reset: open the Pico CDC serial port and send `format` followed by Enter. This explicitly **erases the sample partition and restores the three supplied factory WAVs**. 
+If you are using a Pico that previously had MicroPython installed you may need to format the 1 MB region. **An old MicroPython installation may leave incompatible data in this region**, so the first installation may need a reset: open the Pico CDC serial port and send `format` followed by Enter. This explicitly **erases the sample partition and restores all 24 supplied factory WAVs**.
 
 ## Serial Debug
 It is possible to debug MIDI Grids via a serial monitor. Open the Pico USB CDC port in a serial monitor (115200 baud is fine; USB CDC does not use a physical UART baud rate). Send commands with a newline/Enter:
@@ -158,7 +158,7 @@ It is possible to debug MIDI Grids via a serial monitor. Open the Pico USB CDC p
 - `samples`: discovered numbered slots and the actual drive-root filenames and sizes.
 - `bootsel`: stop playback and reboot into the Pico USB bootloader. The serial port disconnects and **RPI-RP2** appears; copy a UF2 onto it to update firmware. Safely eject the sample drive first if USB drive mode is active. Flash this firmware once using the physical BOOTSEL button to enable the command.
 
-While stopped, hold Start/Stop and turn a drum knob. Each attempted selection logs its filename, file size, WAV encoding/channels/rate/bit depth, PCM size, and RAM usage. Rejected samples print the specific reason and the previous selection is restored. 
+While stopped, hold Start/Stop and turn a drum knob. Each attempted selection logs its filename, file size, WAV encoding/channels/rate/bit depth, PCM size, and RAM usage. Rejected samples print the specific reason and the previous selection is restored.
 
 Send `status` for transport, per-drum MIDI settings and sample numbers, raw pots, sample frame counts, division and dropped-message diagnostics. Send `test` to play the selected bass drum and send its configured MIDI note, even while stopped. All seven pot directions are inverted to match the hardware: clockwise increases values.
 
@@ -207,3 +207,5 @@ Reboot the Pico holding Start/Stop, copy the converted WAVs to the drive root, r
 ```sh
 python3 tests/test_convert_samples.py
 ```
+
+The bundled factory library contains eight samples per voice (24 total). In the browser, choose them under **Settings → Browser audio → Factory sample**. Run `python3 tools/embed_assets.py` after changing WAVs to refresh both the firmware assets and browser library. Fresh Pico sample partitions receive the whole library; flashing an existing Pico preserves its sample drive. To update that drive, copy `samples/*.WAV` in USB drive mode and safely eject, keeping `CONFIG.TXT` and `SELECT.TXT`.

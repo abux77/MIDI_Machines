@@ -4,8 +4,19 @@ include(pico_sdk_import.cmake)
 project(midi_grids C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 pico_sdk_init()
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+file(GLOB FACTORY_WAVS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/samples/*.WAV")
+add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/src/factory.h" "${CMAKE_CURRENT_SOURCE_DIR}/core/grids_data.h"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/embed_assets.py"
+    DEPENDS tools/embed_assets.py data/grids_data.py ${FACTORY_WAVS}
+    COMMENT "Regenerating factory sample library and pattern data"
+    VERBATIM)
+add_custom_target(factory_assets DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/factory.h" "${CMAKE_CURRENT_SOURCE_DIR}/core/grids_data.h")
 add_subdirectory(core)
+add_dependencies(grids_core factory_assets)
 add_executable(midi_grids src/main.c src/audio.c src/storage.c src/flash_disk.c src/storage_usb.c src/usb_descriptors.c third_party/fatfs/ff.c third_party/fatfs/ffunicode.c)
+add_dependencies(midi_grids factory_assets)
 target_include_directories(midi_grids PRIVATE include src third_party/fatfs)
 target_compile_options(midi_grids PRIVATE -Wall -Wextra)
 target_compile_definitions(midi_grids PRIVATE PICO_STDIO_USB_USE_DEFAULT_DESCRIPTORS=0 PICO_STDIO_USB_ENABLE_IRQ_BACKGROUND_TASK=0 PICO_STDIO_USB_ENABLE_TINYUSB_INIT=0 PICO_STDIO_USB_ENABLE_RESET_VIA_VENDOR_INTERFACE=0 PICO_STDIO_USB_STDOUT_TIMEOUT_US=0 PICO_STACK_SIZE=4096)

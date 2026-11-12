@@ -38,7 +38,8 @@ After changing C engine code, rebuild and commit `web/grids.wasm` before pushing
 - `src/main.c`: Pico ADC/buttons, LEDs, USB/DIN, sample storage, and audio hardware.
 - `web/bridge.c`: small WebAssembly ABI, isolated state, and non-mutating previews.
 - `web/app.js`: DOM controls, browser clock scheduling, Web MIDI, and visualization.
-- `web/audio.js`: Web Audio sample decoding and playback. Same factory WAVs as Pico.
+- `web/audio.js`: Web Audio sample decoding and playback. Same 24 factory WAVs as Pico.
+- `web/samples.js`: generated factory library; select any of eight sounds under Settings → Browser audio → Factory sample.
 
 Browser scheduling uses a 20 ms timer to schedule audio/24-PPQN MIDI up to 60 ms
 in advance. Control changes take effect on subsequent scheduled ticks. Playback

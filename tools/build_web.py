@@ -13,6 +13,5 @@ subprocess.run([compiler, '--target=wasm32', '-std=c11', '-O2', '-Wall', '-Wextr
     '-Wl,--no-entry', '-Wl,--strip-all', *(f'-Wl,--export=web_{name}' for name in exports),
     '-o', str(root/'web/grids.wasm')], check=True)
 (root/'web/grids.wasm').chmod(0o644)
-for name in ['BD01.WAV','SD01.WAV','HH01.WAV']:
-    shutil.copyfile(root/'samples'/name, root/'web/assets'/name)
+subprocess.run([os.sys.executable, str(root/'tools/embed_assets.py')], check=True)
 print('Built web/grids.wasm and copied factory samples.')

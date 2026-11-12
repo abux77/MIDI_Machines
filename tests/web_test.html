@@ -34,6 +34,16 @@ try {
  doc.getElementById('play').click();assert(!doc.getElementById('play').classList.contains('playing'),'Stop UI failed');
  doc.getElementById('reset').click();assert(doc.getElementById('position').textContent.includes('01'),'Restart failed');
  doc.getElementById('mute-0').click();
+ for(let p=0;p<3;p++){
+  const preset=doc.getElementById(`preset-${p}`);
+  assert(preset.options.length===8,'Missing bundled samples');
+  for(const option of preset.options){
+   preset.value=option.value;await preset.onchange({target:preset});
+   assert(doc.getElementById(`sample-name-${p}`).textContent===option.value,`Could not decode ${option.value}`);
+  }
+  await doc.getElementById(`factory-${p}`).onclick();
+  assert(preset.selectedIndex===0,'Factory reset did not restore slot 01');
+ }
  const sent=[];const port={id:'test-output',name:'Test output',state:'connected',send:(bytes,time)=>sent.push({bytes,time}),clear:()=>{}};
  const input={id:'test-input',name:'Test input',state:'connected'};
  Object.defineProperty(win.navigator,'requestMIDIAccess',{configurable:true,value:async()=>({inputs:new Map([[input.id,input]]),outputs:new Map([[port.id,port]])})});

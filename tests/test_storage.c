@@ -13,7 +13,12 @@ bool flash_disk_write(uint32_t o,const void *b,size_t n){if(o>sizeof(disk)||n>si
 int main(void){
  memset(disk,255,sizeof(disk));storage_init();assert(samples_load());assert(sample_frames[0]&&sample_frames[1]&&sample_frames[2]);
  settings_load();assert(drum_channel[0]==0&&drum_note[0]==36&&selected_sample[0]==1&&configured_usb_midi);
- assert(sample_choice(0,0)==1&&sample_choice(0,255)==1);
+ for(unsigned voice=0;voice<3;voice++) {
+  assert(sample_choice(voice,0)==1&&sample_choice(voice,255)==8);
+  for(unsigned slot=1;slot<=8;slot++) assert(sample_select(voice,slot)&&samples_load());
+  assert(sample_select(voice,1));
+ }
+ assert(samples_load());
  FIL config;UINT written;
  const char *text="# USB_MIDI,ON\nUSB_MIDI,OFF\nUSB_MIDI,INVALID\nBD,CH10,N60\nSD,CH16,N0\nHH,CH0,N200\nBD,CH17,N128\n";
  assert(f_open(&config,"CONFIG.TXT",FA_WRITE|FA_CREATE_ALWAYS)==FR_OK);
@@ -34,7 +39,9 @@ int main(void){
  assert(f_write(&config,old_selection,strlen(old_selection),&written)==FR_OK);assert(f_close(&config)==FR_OK);
  assert(f_open(&config,"BD09.WAV",FA_WRITE|FA_CREATE_ALWAYS)==FR_OK);assert(f_close(&config)==FR_OK);
  settings_load();assert(selected_sample[0]==1&&selected_sample[1]==1&&selected_sample[2]==1);
- assert(sample_choice(0,255)==1&&!sample_select(0,9)&&!sample_select(0,16));
+ assert(sample_choice(0,255)==8&&!sample_select(0,9)&&!sample_select(0,16));
+ /* Remove intermediate slots to exercise sparse sample discovery. */
+ for(unsigned slot=2;slot<8;slot++){char name[13];snprintf(name,sizeof(name),"BD%02u.WAV",slot);assert(f_unlink(name)==FR_OK);}
  /* Copy a real WAV to a sparse numbered slot, select, save and reload. */
  FIL source,dest;unsigned char block[512];UINT got;
  assert(f_open(&source,"BD01.WAV",FA_READ)==FR_OK);assert(f_open(&dest,"BD08.WAV",FA_WRITE|FA_CREATE_ALWAYS)==FR_OK);

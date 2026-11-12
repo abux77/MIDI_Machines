@@ -1,4 +1,5 @@
 import {loadEngine} from './engine.js';
+import {sampleLibrary} from './samples.js';
 import {SamplePlayer} from './audio.js';
 import {MidiInputParser} from './midi.js';
 const $ = id => document.getElementById(id);
@@ -15,12 +16,12 @@ const cells = [[],[],[]];
 const status = text => { $('status').textContent = text; };
 const themeSelect = $('theme');
 function applyTheme(value) {
-  const theme = [...themeSelect.options].some(option => option.value === value) ? value : 'forest';
+  const theme = [...themeSelect.options].some(option => option.value === value) ? value : 'halftone-inverted';
   document.documentElement.dataset.theme = theme;
   themeSelect.value = theme;
   document.querySelector('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
 }
-try { applyTheme(localStorage.getItem('midi-grids-theme')); } catch { applyTheme('forest'); }
+try { applyTheme(localStorage.getItem('midi-grids-theme')); } catch { applyTheme('halftone-inverted'); }
 themeSelect.onchange = () => {
   applyTheme(themeSelect.value);
   try { localStorage.setItem('midi-grids-theme', themeSelect.value); } catch { /* Theme works without storage. */ }
@@ -41,12 +42,17 @@ for (let p=0;p<3;p++) {
     if (muted[p]) silence();
   };
   const settings = document.createElement('div'); settings.className = 'sample-setting';
-  settings.innerHTML = `<div class="sample-name">${names[p].toUpperCase()} · <span id="sample-name-${p}">${files[p]}</span></div><label>Load sample<input id="sample-${p}" type="file" accept="audio/*,.wav"></label><button id="factory-${p}">Restore factory sample</button><div class="routing"><label>MIDI channel <input id="channel-${p}" type="number" min="1" max="16" value="1"></label><label>Note <input id="note-${p}" type="number" min="0" max="127" value="${notes[p]}"></label></div>`;
+  settings.innerHTML = `<div class="sample-name">${names[p].toUpperCase()} · <span id="sample-name-${p}">${files[p]}</span></div><label>Factory sample<select id="preset-${p}" aria-label="${names[p]} sample">${sampleLibrary[p].map(file => `<option value="${file}">${file}</option>`).join('')}</select></label><label>Load sample<input id="sample-${p}" type="file" accept="audio/*,.wav"></label><button id="factory-${p}">Restore factory sample</button><div class="routing"><label>MIDI channel <input id="channel-${p}" type="number" min="1" max="16" value="1"></label><label>Note <input id="note-${p}" type="number" min="0" max="127" value="${notes[p]}"></label></div>`;
   $('sample-settings').append(settings);
   $(`sample-${p}`).onchange = async event => {
     const file = event.target.files[0]; if (!file) return;
     try {await ensureAudio(); await audio.load(p, await file.arrayBuffer()); $(`sample-name-${p}`).textContent = file.name; status(`${names[p]} sample loaded.`);}
     catch (error) {status(`Could not decode sample: ${error.message}`);}
+  };
+  $(`preset-${p}`).onchange = async event => {
+    const file = event.target.value;
+    try {await ensureAudio(); await loadFactory(p, file); $(`sample-${p}`).value = ''; status(`${names[p]} ${file} loaded.`);}
+    catch(error) {$(`preset-${p}`).value = files[p]; status(error.message);}
   };
   $(`factory-${p}`).onclick = async () => {
     try {await ensureAudio(); await loadFactory(p); $(`sample-${p}`).value = ''; status(`${names[p]} factory sample restored.`);}
@@ -97,12 +103,12 @@ $('map').onpointerdown=event=>{if(event.button!==0)return;$('map').setPointerCap
 $('map').onpointermove=event=>{if($('map').hasPointerCapture(event.pointerId))point(event);};
 $('map').onpointerup=event=>{if($('map').hasPointerCapture(event.pointerId))$('map').releasePointerCapture(event.pointerId);};
 controls();
-async function loadFactory(p){const response=await fetch(`assets/${files[p]}`);if(!response.ok)throw new Error(`Could not load ${files[p]}`);await audio.load(p,await response.arrayBuffer());$(`sample-name-${p}`).textContent=files[p];}
+async function loadFactory(p, file = sampleLibrary[p][0]){const response=await fetch(`assets/${file}`);if(!response.ok)throw new Error(`Could not load ${file}`);await audio.load(p,await response.arrayBuffer());files[p]=file;$(`sample-name-${p}`).textContent=file;$(`preset-${p}`).value=file;}
 let audioReady;
 async function ensureAudio(){
   if(!audio){audio=new SamplePlayer();audio.enabled=$('audio-enabled').checked;audio.master.gain.value=Number($('volume').value)/100;}
   await audio.context.resume();
-  if(!audioReady) audioReady=Promise.all([0,1,2].map(loadFactory)).catch(error=>{audioReady=null;throw error;});
+  if(!audioReady) audioReady=Promise.all([0,1,2].map(p => loadFactory(p))).catch(error=>{audioReady=null;throw error;});
   await audioReady;
 }
 $('volume').oninput=()=>{if(audio)audio.master.gain.setTargetAtTime(Number($('volume').value)/100,audio.context.currentTime,.01);};

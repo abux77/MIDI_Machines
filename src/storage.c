@@ -71,7 +71,7 @@ static FRESULT provision_factory(void) {
     FRESULT result = f_mkfs("", &options, work, sizeof(work));
     if (result == FR_OK) result = f_mount(&filesystem, "", 1);
     if (result == FR_OK) result = f_setlabel("MIDI GRIDS");
-    for (unsigned i=0; i<3 && result==FR_OK; ++i) {
+    for (unsigned i=0; i<sizeof(factory)/sizeof(factory[0]) && result==FR_OK; ++i) {
         FIL file;
         UINT written;
         result = f_open(&file, factory[i].name, FA_WRITE|FA_CREATE_ALWAYS);
