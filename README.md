@@ -1,6 +1,23 @@
 # MIDI Grids
 This is based on the Mutable Instruments Grid module. I liked the idea of it but I don't have any eurorack modules so I thought I would make a version that fits in a guitar pedal and triggers sounds via MIDI. This has been written using the C SDK for the Raspberry Pi Pico and includes a number of features the original module didn't have. MIDI Grids supports MIDI via 5-pin DIN and USB, it also supports mono sample playback directly with 8 selectable samples per voice.
 
+## Run in a browser
+
+The browser app and Pico firmware share the **same C engine**, including pattern data,
+interpolation, chaos, accents, and 24-PPQN transport. The browser runs that C as
+WebAssembly; there is no separate JavaScript pattern implementation.
+
+The ready-to-run browser build is checked in. From this repository:
+
+```sh
+python3 -m http.server 8000 --directory web --bind 127.0.0.1
+```
+
+Open **http://localhost:8000**, then press **Start**. The frontend includes an X/Y
+pattern pad, voice densities, chaos, tempo, a 32-step display, the factory drum
+samples, custom sample loading, mute, and optional Web MIDI input/output.
+See [web/README.md](web/README.md) for building, MIDI, and architecture details.
+
 ## Flashing your Raspberry Pi Pico
 The compiled firmware is in `build/midi_grids.uf2`. Hold **BOOTSEL** while connecting the Pico, then copy this file to RPI-RP2. Firmware updates write only the firmware region; the last 1 MB is reserved for samples and configuration files. You can access this 1 MB region by holding the Start/Stop button during power up, the region will mount in your computer like a USB drive and you can replace samples and/or edit the configuration file.
 
@@ -36,8 +53,58 @@ The compiled firmware is in `build/midi_grids.uf2`. Hold **BOOTSEL** while conne
 - Start resets the pattern; Continue retains its position; Stop silences voices and ends outgoing clock. Clock alone changes sync source without starting playback.
 - External mode tempo knob: low third = quarter speed, middle third = half speed, high third = full speed. Small hysteresis prevents division chatter.
 - Division changes the drum sequence and tempo LED; outgoing clock is the incoming 24-PPQN stream at its original speed. Accepted transport messages go to both outputs.
-- After **2 seconds without clock**, internal tempo resumes from the knob if playback was running. A stopped transport remains stopped. Adjust `CLOCK_TIMEOUT_US` in `include/transport.h` if needed.
+- After **2 seconds without clock**, internal tempo resumes from the knob if playback was running. A stopped transport remains stopped. Adjust `CLOCK_TIMEOUT_US` in `core/transport.h` if needed.
 - Avoid routing the forwarded USB MIDI output back into its input in your DAW.
+
+## Knob MIDI CC output and browser screen
+
+The firmware sends knob values on **MIDI channel 1**, over DIN and enabled USB
+MIDI, while playing or stopped. Drum channels in CONFIG.TXT do not change the
+control channel. Each knob sends a standard 14-bit CC pair: the coarse CC is
+usable by ordinary 7-bit controllers; its fine CC preserves exact Pico values in
+the web app. This follows the [MIDI CC MSB/LSB convention](https://midi.org/midi-1-0-control-change-messages).
+
+| Knob | Coarse CC | Fine CC | Native range |
+|---|---|---|---|
+| X | 20 | 52 | 0–255 |
+| Y | 21 | 53 | 0–255 |
+| Kick density | 22 | 54 | 0–255 |
+| Snare density | 23 | 55 | 0–255 |
+| Hi-hat density | 24 | 56 | 0–255 |
+| Chaos | 25 | 57 | 0–255 |
+| Tempo | 26 | 58 | 40–240 BPM |
+
+CC **27** additionally reports effective clock division as value **1, 2, or 4**.
+It reports the division actually used by playback: **1** on internal clock,
+or the selected **1/2/4** division when following external clock. This keeps
+the browser at the same speed as the Pico's forwarded MIDI clock.
+Knob input averages eight ADC readings per scan, then applies a 1/8 exponential
+average (about a 52 ms time constant) and up to 24 ADC counts of hysteresis at each
+native value boundary. This suppresses idle CC jitter while retaining fine knob
+adjustments; it also stabilizes the parameters used by the drum engine.
+Knob updates are capped at 25 per second per knob, with queue space reserved for
+notes and realtime messages. All effective values refresh every two seconds and
+on USB connection, so opening the browser later does not require moving every
+knob. Density CCs reflect the active density during sample selection and pickup.
+
+To use the browser as a screen:
+
+1. Build/flash the updated firmware and connect the Pico USB cable with
+   `USB_MIDI,ON`. A DIN-to-computer MIDI interface also works.
+2. Open the web app, expand **Settings**, and check **Use as hardware screen**.
+3. Click **Enable MIDI**, grant permission, and select the Pico under
+   **MIDI input (knobs & clock)**. Leave MIDI output unselected.
+4. Values synchronize within two seconds; move any knob to see it immediately.
+   Press the Pico Start/Stop button to start the web playhead from the same origin.
+
+Screen mode produces no browser audio or MIDI output. It follows hardware
+Start/Continue/Stop and clock and waits if clock is lost. A clock stream alone
+does not reveal whether hardware was already playing, so stop/start the Pico if
+connecting mid-performance. The map is a preview from the web engine; chaos RNG
+state is not transferred over MIDI, so random future hits can differ between
+engines. The seven parameter values and clock division are synchronized exactly.
+For browser instrument playback controlled by the same knobs, leave screen mode
+off. Incoming CCs are never echoed back.
 
 ## USB Drive Mode
 
@@ -87,6 +154,7 @@ It is possible to debug MIDI Grids via a serial monitor. Open the Pico USB CDC p
 
 - `status`: selected sample numbers, loaded frame counts, MIDI settings, and raw knobs.
 - `samples`: discovered numbered slots and the actual drive-root filenames and sizes.
+- `bootsel`: stop playback and reboot into the Pico USB bootloader. The serial port disconnects and **RPI-RP2** appears; copy a UF2 onto it to update firmware. Safely eject the sample drive first if USB drive mode is active. Flash this firmware once using the physical BOOTSEL button to enable the command.
 
 While stopped, hold Start/Stop and turn a drum knob. Each attempted selection logs its filename, file size, WAV encoding/channels/rate/bit depth, PCM size, and RAM usage. Rejected samples print the specific reason and the previous selection is restored. 
 
@@ -99,7 +167,7 @@ Use the Raspberry Pi Pico VS Code extension to import this CMake project, choose
 cmake -S . -B build -G Ninja -DPICO_BOARD=pico -DPICO_SDK_PATH=/path/to/pico-sdk
 cmake --build build
 ```
-Validated here with Pico SDK 2.3.1 and Arm GNU toolchain 15.2.Rel1. SDK's TinyUSB submodule and picotool must be installed. No network dependencies are fetched by this project itself. Rebuild embedded defaults after modifying `samples/` or map data:
+The current CC-enabled firmware builds with Pico SDK 2.2.0 and Arm GNU toolchain 14.2.Rel1 for the original Pico (RP2040). SDK's TinyUSB submodule and picotool must be installed. No network dependencies are fetched by this project itself. Rebuild embedded defaults after modifying `samples/` or map data:
 ```sh
 python3 tools/embed_assets.py
 cmake --build build

@@ -9,9 +9,21 @@ uint8_t grids_level(unsigned s,unsigned p,unsigned x,unsigned y) {
  return mix(mix(nodes[map[i][j]][o],nodes[map[i+1][j]][o],fx),mix(nodes[map[i][j+1]][o],nodes[map[i+1][j+1]][o],fx),fy);
 }
 void grids_reset(grids_t *g){g->step=0;for(unsigned p=0;p<3;p++)g->perturbation[p]=0;}
-uint8_t grids_step(grids_t *g,uint8_t *a){
- if(!g->step)for(unsigned p=0;p<3;p++){g->rng=g->rng*1664525u+1013904223u;g->perturbation[p]=((g->rng>>24)*(g->chaos>>2))>>8;}
+static void perturb(grids_t *g){
+ for(unsigned p=0;p<3;p++){g->rng=g->rng*1664525u+1013904223u;g->perturbation[p]=((g->rng>>24)*(g->chaos>>2))>>8;}
+}
+static uint8_t evaluate(const grids_t *g,unsigned step,uint8_t *a){
  uint8_t hits=0;*a=0;
- for(unsigned p=0;p<3;p++){unsigned l=grids_level(g->step,p,g->x,g->y)+g->perturbation[p];if(l>255)l=255;if(l>255u-g->density[p]){hits|=1u<<p;if(l>192)*a|=1u<<p;}}
+ for(unsigned p=0;p<3;p++){unsigned l=grids_level(step,p,g->x,g->y)+g->perturbation[p];if(l>255)l=255;if(l>255u-g->density[p]){hits|=1u<<p;if(l>192)*a|=1u<<p;}}
+ return hits;
+}
+uint8_t grids_step(grids_t *g,uint8_t *a){
+ if(!g->step)perturb(g);
+ uint8_t hits=evaluate(g,g->step,a);
  g->step=(g->step+1)&31;return hits;
+}
+uint8_t grids_preview(const grids_t *g,unsigned step,uint8_t *a){
+ grids_t copy=*g;
+ if(!copy.step)perturb(&copy);
+ return evaluate(&copy,step&31,a);
 }

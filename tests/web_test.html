@@ -1,0 +1,92 @@
+<!doctype html><html><head><title>Browser checks</title></head><body><pre id="result">RUNNING</pre><iframe id="app" src="/web/" width="1200" height="1000"></iframe><script type="module">
+import {loadEngine} from '/web/engine.js';
+import {MidiInputParser} from '/web/midi.js';
+const result=document.getElementById('result');
+const assert=(condition,message)=>{if(!condition)throw new Error(message);};
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+try {
+ const fixtures=await (await fetch('/native-fixtures.json')).json();
+ for(const [index,test] of fixtures.entries()){
+  const e=await loadEngine();e.web_set(...test.params);e.web_division(test.division);
+  if(test.external)e.web_receive(0xfa,0);else e.web_start();
+  for(let n=0;n<test.events.length;n++){
+   for(let s=0;s<32;s++)e.web_preview(s); // Must not advance RNG, phase or pattern.
+   assert(e.web_tick()===test.events[n],`Native/WASM mismatch: case ${index}, tick ${n}`);
+  }
+  assert(e.web_receive(0xfc,100)===0xfc&&!e.web_running(),'Stop failed');
+  assert(e.web_tick()===0,'Stopped engine emitted event');
+  assert(e.web_receive(0xfb,110)===0xfb&&e.web_running(),'Continue failed');
+  assert(!e.web_timeout(2109,20833),'Early timeout');
+  assert(e.web_timeout(2110,20833)&&!e.web_source()&&e.web_running(),'Clock fallback failed');
+ }
+ const frame=document.getElementById('app');
+ for(let i=0;i<100&&frame.contentDocument.getElementById('play')?.disabled;i++)await wait(50);
+ const win=frame.contentWindow,doc=frame.contentDocument;
+ assert(!doc.getElementById('play').disabled,'Frontend failed to load');
+ assert(doc.querySelectorAll('.step').length===96,'Missing pattern cells');
+ const slider=doc.getElementById('kick');slider.value=255;slider.dispatchEvent(new win.Event('input'));
+ assert(doc.querySelector('output[for="kick"]').value==='255','Density control failed');
+ doc.getElementById('play').click();
+ for(let i=0;i<100&&!doc.getElementById('play').classList.contains('playing');i++)await wait(50);
+ assert(doc.getElementById('play').classList.contains('playing'),`Audio start failed: ${doc.getElementById('status').textContent}`);
+ await wait(300);assert(doc.querySelector('.current'),'No playhead');
+ doc.getElementById('mute-0').click();assert(doc.getElementById('mute-0').getAttribute('aria-pressed')==='true','Mute failed');
+ doc.getElementById('play').click();assert(!doc.getElementById('play').classList.contains('playing'),'Stop UI failed');
+ doc.getElementById('reset').click();assert(doc.getElementById('position').textContent.includes('01'),'Restart failed');
+ doc.getElementById('mute-0').click();
+ const sent=[];const port={id:'test-output',name:'Test output',state:'connected',send:(bytes,time)=>sent.push({bytes,time}),clear:()=>{}};
+ const input={id:'test-input',name:'Test input',state:'connected'};
+ Object.defineProperty(win.navigator,'requestMIDIAccess',{configurable:true,value:async()=>({inputs:new Map([[input.id,input]]),outputs:new Map([[port.id,port]])})});
+ doc.getElementById('midi-connect').click();await wait(150);
+ const select=doc.getElementById('midi-output');select.value=port.id;select.dispatchEvent(new win.Event('change'));
+ const inputSelect=doc.getElementById('midi-input');inputSelect.value=input.id;inputSelect.dispatchEvent(new win.Event('change'));
+ input.onmidimessage({data:[0xfa]});input.onmidimessage({data:[0xf8]});
+ assert(doc.getElementById('play').classList.contains('playing'),'External start failed');
+ assert(sent.some(m=>m.bytes[0]===0xfa)&&sent.some(m=>m.bytes[0]===0xf8),'MIDI realtime forwarding failed');
+ assert(sent.some(m=>m.bytes.length===3&&m.bytes[0]===0x90&&m.bytes[2]>0),'MIDI notes failed');
+ input.onmidimessage({data:[0xfc]});assert(!doc.getElementById('play').classList.contains('playing'),'External stop failed');
+ // Parse real channel messages without leaking SysEx or note data into controls.
+ const controls=[],realtime=[];
+ const parser=new MidiInputParser((...cc)=>controls.push(cc),b=>realtime.push(b));
+ parser.receive([0xb0,20,0xf8,100,21,101,0xf0,20,127,0xf8,0xf7,22,127,0x90,23,127,0xc0,12,0xb0,24,102]);
+ assert(JSON.stringify(controls)===JSON.stringify([[0xb0,20,100],[0xb0,21,101],[0xb0,24,102]]),'CC parser/running-status/SysEx filtering failed');
+ assert(realtime.length===2,'Interleaved realtime lost');
+ const controlFixture=await (await fetch('/control-fixtures.json')).json();
+ const controlIds=['x','y','kick','snare','hat','chaos','bpm','division'];
+ const beforeCC=sent.length;
+ for(const message of controlFixture.messages)input.onmidimessage({data:message});
+ for(let i=0;i<controlIds.length;i++) assert(Number(doc.getElementById(controlIds[i]).value)===controlFixture.values[i],`Hardware CC did not update ${controlIds[i]} at full resolution`);
+ assert(doc.querySelector('output[for="x"]').value==='1','CC numeric output stale');
+ assert(Number.parseFloat(doc.getElementById('crosshair').style.left)<1,'CC map position stale');
+ assert(sent.length===beforeCC,'Incoming CC was echoed');
+ input.onmidimessage({data:[0xb1,20,127,0xb0,7,127]});
+ assert(doc.getElementById('x').value==='1','Unrelated channel or controller changed controls');
+ // A fresh page in screen mode must work without constructing an AudioContext.
+ const screen=document.createElement('iframe');screen.src='/web/';document.body.append(screen);
+ await new Promise(resolve=>screen.onload=resolve);
+ const screenWin=screen.contentWindow,screenDoc=screen.contentDocument;
+ for(let i=0;i<100&&screenDoc.getElementById('play').disabled;i++)await wait(50);
+ assert(!screenDoc.getElementById('play').disabled,'Screen frontend failed to initialize');
+ screenWin.AudioContext=class { constructor(){throw new Error('Audio must not initialize in hardware screen mode');} };
+ const screenSent=[],screenPort={...port,send:(bytes,time)=>screenSent.push({bytes,time})};
+ const screenInput={...input,onmidimessage:null};
+ Object.defineProperty(screenWin.navigator,'requestMIDIAccess',{value:async()=>({inputs:new Map([[screenInput.id,screenInput]]),outputs:new Map([[screenPort.id,screenPort]])})});
+ const hardware=screenDoc.getElementById('hardware-screen');hardware.checked=true;hardware.dispatchEvent(new screenWin.Event('change'));
+ screenDoc.getElementById('midi-connect').click();await wait(150);
+ assert(screenDoc.getElementById('midi-status').textContent.includes('MIDI enabled'),'Silent screen depended on audio initialization');
+ const screenSelect=screenDoc.getElementById('midi-input');screenSelect.value=screenInput.id;screenSelect.dispatchEvent(new screenWin.Event('change'));
+ assert(screenInput.onmidimessage,'Screen input not attached');
+ for(const message of controlFixture.messages)screenInput.onmidimessage({data:message});
+ for(let i=0;i<controlIds.length;i++)assert(Number(screenDoc.getElementById(controlIds[i]).value)===controlFixture.values[i],`Silent screen CC failed: ${controlIds[i]}`);
+ // Set an output even though the UI disables it, to ensure the send guard holds.
+ screenDoc.getElementById('midi-output').value=screenPort.id;screenDoc.getElementById('midi-output').dispatchEvent(new screenWin.Event('change'));
+ screenInput.onmidimessage({data:[0xfa,0xf8,0xf8,0xf8,0xf8]});await wait(100);
+ assert(screenDoc.getElementById('play').classList.contains('playing')&&screenDoc.querySelector('.current'),'Silent screen did not follow hardware transport');
+ assert(screenSent.length===0,'Screen mode sent MIDI back to hardware');
+ screenInput.onmidimessage({data:[0xfc]});assert(!screenDoc.getElementById('play').classList.contains('playing'),'Hardware Stop failed in screen mode');
+ screenInput.onmidimessage({data:[0xfb,0xf8]});assert(screenDoc.getElementById('play').classList.contains('playing'),'Hardware Continue failed in screen mode');
+ await wait(2200);assert(!screenDoc.getElementById('play').classList.contains('playing'),'Silent screen started its own clock after hardware loss');
+ assert(screenSent.length===0,'Clock loss sent MIDI in screen mode');
+ result.textContent=`PASS: ${fixtures.length} native/WASM cases; preview purity; transport; frontend; sample audio; mocked MIDI; full-resolution hardware CCs; silent screen.`;
+} catch(error){result.textContent=`FAIL: ${error.stack}`;}
+</script></body></html>

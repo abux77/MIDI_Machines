@@ -1,7 +1,14 @@
 # Hardware validation — still required
 
 Build and host tests do not establish electrical operation or measured clock jitter.
-This firmware has not been flashed onto or tested on a connected Pico in this session.
+On 2026-11-12, firmware was flashed onto a connected original Pico using the CDC
+`bootsel` command. USB serial/MIDI reconnected successfully. A stationary 20-second
+capture showed no changes across all seven knob values after filtering updates.
+Internal clock now reports effective division 1 over CC27; replaying a captured
+576-clock stream through the browser WASM engine produced the same 12 kick hits
+as the hardware, compared with 6 hits under the previous incorrect division 2.
+These checks do not replace the remaining electrical, audio, DIN, and storage
+bench tests below.
 
 1. Flash the UF2 to an original Pico. Check CDC startup; expect embedded factory audio on incompatible old MicroPython storage.
    Confirm the disk is preserved; use explicit `format` only to initialize editable storage.
@@ -43,3 +50,17 @@ This firmware has not been flashed onto or tested on a connected Pico in this se
     routing. Check invalid entries use defaults and boot-held storage works with USB MIDI disabled.
     Check USB MIDI changes require reboot, ON/OFF enumerate correctly, CDC remains
     available, GP14 has no effect, and files numbered 09–16 are ignored.
+
+15. Capture channel-1 knob CCs on DIN and USB while stopped and playing: X/Y/K/S/H/
+    chaos/tempo use coarse CC20–26 and fine CC52–58; CC27 reports division 1/2/4.
+    Verify clockwise direction and exact native values after decoding paired CCs,
+    endpoints 0/255 and 40/240 BPM, no stationary spam beyond two-second refresh,
+    at most 25 updates/second/knob, and no audio/clock interruptions when sweeping
+    all knobs. Change drum note channels and confirm control channel stays at 1.
+16. Connect the browser after boot without touching knobs; check all controls
+    populate within two seconds. Enable hardware-screen mode: no duplicate browser
+    sound or MIDI echo, and hardware Start/Stop/Continue drives the playhead.
+    Unplug clock while running; screen must wait rather than free-run. Reconnect,
+    select the port again, and stop/start hardware to align the playhead. Hold
+    sample-select and exercise density pickup; display should retain active
+    density. Confirm standard coarse-only CCs still control the web instrument.

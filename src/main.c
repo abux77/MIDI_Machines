@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <string.h>
 #include "pico/stdlib.h"
+#include "pico/bootrom.h"
 #include "hardware/uart.h"
 #include "hardware/adc.h"
 #include "tusb.h"
 #include "grids.h"
 #include "transport.h"
+#include "sequencer.h"
+#include "midi_controls.h"
+#include "knob_filter.h"
 #include "storage.h"
 #include "audio.h"
 bool usb_midi_enabled;
@@ -32,9 +36,21 @@ static void send(const uint8_t *data,unsigned n){
   if(usb_head-usb_tail<128){uint8_t *p=usb_queue[usb_head++&127];p[0]=n==1?15:data[0]>>4;p[1]=data[0];p[2]=n>1?data[1]:0;p[3]=n>2?data[2]:0;}else dropped++;
  }
 }
+static midi_controls_tx_t knob_cc;
+static void control_cc(unsigned control,unsigned value,uint64_t now){
+ /* Leave queue headroom for notes and realtime clock; retry on the next scan. */
+ if(din_head-din_tail>512-64)return;
+ if(usb_midi_enabled&&tud_midi_mounted()&&usb_head-usb_tail>128-16)return;
+ uint8_t bytes[6];unsigned n=midi_controls_poll(&knob_cc,control,value,now,bytes);
+ for(unsigned i=0;i<n;i+=3)send(bytes+i,3);
+}
 static void realtime(uint8_t b){send(&b,1);}
 static void note(unsigned p,unsigned velocity){uint8_t b[3]={0x90|drum_channel[p],drum_note[p],velocity};send(b,3);}
 static void output_service(void){
+ static bool midi_was_mounted;
+ bool mounted=usb_midi_enabled&&tud_midi_mounted();
+ if(mounted&&!midi_was_mounted)knob_cc.seen=0; /* Snapshot on USB connection. */
+ midi_was_mounted=mounted;
  while(din_tail!=din_head&&uart_is_writable(uart0))uart_putc_raw(uart0,din_queue[din_tail++&511]);
  if(!tud_midi_mounted()){usb_tail=usb_head;return;}
  while(usb_tail!=usb_head){if(!tud_midi_packet_write(usb_queue[usb_tail&127]))break;usb_tail++;}
@@ -43,9 +59,10 @@ static void release_notes(void){for(unsigned p=0;p<3;p++)if(held_notes&(1u<<p))n
 static void stop_sound(void){release_notes();audio_stop();for(unsigned p=0;p<4;p++){gpio_put(6+p,0);led_until[p]=0;}}
 static void tick(uint64_t now){
  release_notes();
- if(!transport.count&&!transport.phase){gpio_put(9,1);led_until[3]=now+35000;}
- if(transport_step_due(&transport)){
-  uint8_t accents,hits=grids_step(&engine,&accents);
+ sequencer_event_t event=sequencer_tick(&engine,&transport);
+ if(event.beat){gpio_put(9,1);led_until[3]=now+35000;}
+ if(event.due){
+  uint8_t accents=event.accents,hits=event.hits;
   for(unsigned p=0;p<3;p++)if(hits&(1u<<p)){unsigned v=(accents&(1u<<p))?127:100;note(p,v);held_notes|=1u<<p;audio_trigger(p,v);gpio_put(6+p,1);led_until[p]=now+35000;}
  }
  
@@ -59,17 +76,21 @@ static void receive(unsigned source,uint8_t b,uint64_t now){
  if(b!=0xf8||transport.running)realtime(b);
  if(b==0xf8&&transport.running)tick(now);
 }
-static unsigned filtered[7],raw_pots[7];static bool initialized[7];
+static knob_filter_t knob_filters[7];
+static unsigned raw_pots[7],knob_values[7];
 static unsigned pot_u8(unsigned r){return r<=16?0:r>=4079?255:(r*255+2047)/4095;}
 static void controls_service(uint64_t now){
  static uint64_t due;static unsigned p;
  if(now<due)return;
  due=now+1000;
  for(unsigned b=0;b<4;b++)gpio_put(16+b,(p>>b)&1);
- busy_wait_us_32(10);for(unsigned d=0;d<3;d++)adc_read();unsigned r=adc_read();
- if(!initialized[p]){filtered[p]=r<<2;raw_pots[p]=r;initialized[p]=true;}else{filtered[p]=filtered[p]-(filtered[p]>>2)+r;r=filtered[p]>>2;if(r>raw_pots[p]+2||raw_pots[p]>r+2)raw_pots[p]=r;}
- unsigned clockwise_raw=4095-raw_pots[p];
- r=pot_u8(clockwise_raw);
+ busy_wait_us_32(10);for(unsigned d=0;d<3;d++)adc_read();
+ unsigned sum=0;for(unsigned d=0;d<8;d++)sum+=adc_read();
+ unsigned value=knob_filter_update(&knob_filters[p],4095-(sum+4)/8,p==6?200:255);
+ unsigned clockwise_raw=knob_filters[p].raw;
+ raw_pots[p]=4095-clockwise_raw;
+ unsigned r=p==6?pot_u8(clockwise_raw):value;
+ knob_values[p]=r;
  if(p==0)engine.x=r;else if(p==1)engine.y=r;else if(p<5){
   unsigned part=p-2;
   if(selecting&&!transport.running){
@@ -93,12 +114,17 @@ static void controls_service(uint64_t now){
    selection_anchor[part]=r;
   }else engine.density[part]=r;
  }else if(p==5)engine.chaos=r;
- else{bpm=40+(clockwise_raw*200+2047)/4095;
+ else{bpm=40+value;
   /* Hysteresis around the third boundaries prevents noisy division changes. */
   if(transport.division==1&&r<165)transport.division=r<80?4:2;
   else if(transport.division==2){if(r>175)transport.division=1;else if(r<80)transport.division=4;}
   else if(transport.division==4&&r>90)transport.division=r>175?1:2;
  }
+ /* Publish effective parameters: sample selection and pickup must not falsely
+  * move density controls on the hardware display. Snapshots also work stopped. */
+ value=p==0?engine.x:p==1?engine.y:p<5?engine.density[p-2]:p==5?engine.chaos:bpm;
+ control_cc(p,value,now);
+ if(p==6)control_cc(MIDI_CONTROL_DIVISION,transport_effective_division(&transport),now);
  p=(p+1)%7;
 }
 static void button_service(uint64_t now){
@@ -111,7 +137,7 @@ static void button_service(uint64_t now){
   selection_used=false;
   selecting=!transport.running;
   if(selecting)for(unsigned p=0;p<3;p++){
-   attempted_sample[p]=0;selection_anchor[p]=pot_u8(4095-raw_pots[p+2]);density_anchor[p]=engine.density[p];
+   attempted_sample[p]=0;selection_anchor[p]=knob_values[p+2];density_anchor[p]=engine.density[p];
   }
  }else{
   if(ignore_release){ignore_release=false;selecting=false;return;}
@@ -137,7 +163,7 @@ static void console_service(void) {
             if (!strcmp(command, "status")) {
                 printf("%s, %u BPM, clock source %u, division %u, dropped MIDI %u\n",
                        storage_edit_active() ? "Sample editing" : transport.running ? "Playing" : "Stopped",
-                       bpm, transport.source, transport.division, dropped);
+                       bpm, transport.source, transport_effective_division(&transport), dropped);
                 printf("USB MIDI: %s; CONFIG.TXT: %s%s\n",usb_midi_enabled?"ON":"OFF",configured_usb_midi?"ON":"OFF",usb_midi_enabled!=configured_usb_midi?" (reboot to apply)":"");
                 for(unsigned p=0;p<3;p++)printf("%s: CH%u N%u sample %02u\n",p==0?"BD":p==1?"SD":"HH",drum_channel[p]+1,drum_note[p],selected_sample[p]);
                 printf("Samples: %s, frames kick=%u snare=%u hat=%u; audio %s\n",
@@ -149,6 +175,23 @@ static void console_service(void) {
             } else if (!strcmp(command,"test")) {
                 if(storage_edit_active()) printf("Eject the sample drive first.\n");
                 else {note(0,100);held_notes|=1;test_note_until=time_us_64()+100000;audio_trigger(0,100);printf("Kick test on MIDI channel %u.\n",drum_channel[0]+1);}
+            } else if (!strcmp(command, "bootsel")) {
+                if (storage_edit_active()) printf("Eject the sample drive before entering BOOTSEL.\n");
+                else {
+                    if (transport.running) realtime(0xfc);
+                    transport.running = false;
+                    stop_sound();
+                    audio_suspend();
+                    printf("Rebooting into BOOTSEL (RPI-RP2).\n");
+                    /* Allow queued note-offs, Stop, and the CDC reply to leave. */
+                    uint64_t deadline = time_us_64() + 100000;
+                    while (time_us_64() < deadline) {
+                        tud_task();
+                        output_service();
+                        tud_cdc_write_flush();
+                    }
+                    reset_usb_boot(0, 0);
+                }
             } else if (!strcmp(command, "format")) {
                 if (storage_edit_active()) printf("Eject the sample drive before formatting.\n");
                 else {
@@ -161,7 +204,7 @@ static void console_service(void) {
                     audio_resume();
                     printf("Factory sample format: %s\n", ok ? "complete" : "failed");
                 }
-            } else if (length) printf("Commands: status; samples; test; format (ERASES sample partition and restores three factory WAVs).\n");
+            } else if (length) printf("Commands: status; samples; test; bootsel; format (ERASES sample partition and restores three factory WAVs).\n");
             length = 0;
         } else if ((c == 8 || c == 127) && length) --length;
         else if (c >= 32 && c < 127 && length + 1 < sizeof(command)) command[length++] = c;

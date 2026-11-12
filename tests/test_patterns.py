@@ -3,7 +3,7 @@ import ast, ctypes, random, subprocess, tempfile
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 # Read the checked-in C node bytes, so no external source path is required to run.
-node_text = (ROOT/'src/grids_data.h').read_text().split('= {',1)[1]
+node_text = (ROOT/'core/grids_data.h').read_text().split('= {',1)[1]
 NODES = [bytes(map(int, row.split(','))) for row in __import__('re').findall(r'\{([\d,]+)\}', node_text)]
 tree=ast.parse((ROOT/'data/grids_data.py').read_text())
 original=next(ast.literal_eval(n.value) for n in tree.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='NODES' for t in n.targets))
@@ -20,7 +20,7 @@ class Engine(ctypes.Structure):
     _fields_=[('step',ctypes.c_uint8),('x',ctypes.c_uint8),('y',ctypes.c_uint8),('density',ctypes.c_uint8*3),('chaos',ctypes.c_uint8),('perturbation',ctypes.c_uint8*3),('rng',ctypes.c_uint32)]
 with tempfile.TemporaryDirectory() as tmp:
     libpath=Path(tmp)/'grids.so'
-    subprocess.run(['cc','-shared','-fPIC','-std=c11','-I'+str(ROOT/'include'),str(ROOT/'src/grids.c'),'-o',str(libpath)],check=True)
+    subprocess.run(['cc','-shared','-fPIC','-std=c11','-I'+str(ROOT/'core'),str(ROOT/'core/grids.c'),'-o',str(libpath)],check=True)
     lib=ctypes.CDLL(str(libpath));lib.grids_level.restype=ctypes.c_uint8
     lib.grids_step.argtypes=[ctypes.POINTER(Engine),ctypes.POINTER(ctypes.c_uint8)]
     lib.grids_step.restype=ctypes.c_uint8

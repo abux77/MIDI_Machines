@@ -13,8 +13,11 @@ bool transport_timeout(transport_t *t,uint64_t now,unsigned period){
  if(!t->source||!t->clock_seen||now<t->last_clock||now-t->last_clock<CLOCK_TIMEOUT_US)return false;
  t->source=0;t->clock_seen=false;t->count=0;t->next_tick=now+period;return true;
 }
+unsigned transport_effective_division(const transport_t *t){
+ return t->source?t->division:1;
+}
 bool transport_step_due(transport_t *t){
- unsigned d=t->source?t->division:1;
+ unsigned d=transport_effective_division(t);
  bool due=t->count==0&&t->phase%3==0;
  if(++t->count>=d){t->count=0;t->phase=(t->phase+1)%24;}
  return due;

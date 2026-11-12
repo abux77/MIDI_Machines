@@ -6,4 +6,6 @@ typedef struct {bool running; unsigned source,phase,division,count; uint64_t las
 /* Returns accepted realtime status, zero for ignored. Source 1=DIN, 2=USB. */
 uint8_t transport_receive(transport_t *t,unsigned source,uint8_t byte,uint64_t now);
 bool transport_timeout(transport_t *t,uint64_t now,unsigned period);
+/* Internal clock is always full speed; the knob divides external sync only. */
+unsigned transport_effective_division(const transport_t *t);
 bool transport_step_due(transport_t *t);
