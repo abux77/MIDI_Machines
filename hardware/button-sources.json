@@ -1,0 +1,46 @@
+{
+  "selection": "PB86-A1 style momentary illuminated push buttons",
+  "quantity": null,
+  "cap_color": null,
+  "led_color": null,
+  "tayda_example": {
+    "sku": "A-7701",
+    "manufacturer": "ZTDA",
+    "mpn": "PS01",
+    "cap_color": "Black",
+    "led_color": "Red",
+    "url": "https://www.taydaelectronics.com/black-push-switch-momentary-spdt-pcb-pins-led-mount.html",
+    "note": "Supplier-linked drawing is shared with A-6805. Footprint equivalence to Honyone/AliExpress variants is not established."
+  },
+  "honyone_reference": "https://www.honyone.com/wap/en/products/show_217.html",
+  "documents": [
+    {
+      "file": "datasheets/Tayda_PS01_A7701_drawing.pdf",
+      "url": "https://www.taydaelectronics.com/datasheets/files/A-6805.pdf",
+      "sha256": "5f7dfb08927516fd8388fca8b185a1bf20e644839348b8b2dc592b1540a8dd1a",
+      "bytes": 183907,
+      "downloaded_utc": "2026-11-13T21:38:54.805844+00:00"
+    },
+    {
+      "file": "drawings/Honyone_PB86_series.png",
+      "url": "https://www.honyone.com/wl_upload/pdf/1533626133.png",
+      "sha256": "4daf86d842e39726f863cc2bfa3dc92a58bf1dbc4d8089efc5dda57f2d52ed68",
+      "bytes": 83489,
+      "downloaded_utc": "2026-11-13T21:38:24.103248+00:00"
+    },
+    {
+      "file": "drawings/Honyone_PB86_drawing.jpg",
+      "url": "https://www.honyone.com/wl_upload/UploadFile/image/20210819/20210819144626_71987.jpg",
+      "sha256": "6430bff4f0bca36f2298e55a178f07584a19d6e069fea33c4164c7b2bc95ea0c",
+      "bytes": 159204,
+      "downloaded_utc": "2026-11-13T21:38:24.729407+00:00"
+    },
+    {
+      "file": "drawings/Honyone_PB86_order_codes.jpg",
+      "url": "https://www.honyone.com/wl_upload/UploadFile/image/20210819/20210819144645_84989.jpg",
+      "sha256": "09259d70e16eeb9924e0039449ddb02d0422cf9c7696c2c370838af0d06951c7",
+      "bytes": 222551,
+      "downloaded_utc": "2026-11-13T21:38:24.915563+00:00"
+    }
+  ]
+}

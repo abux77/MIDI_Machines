@@ -193,3 +193,49 @@ Source: [Adafruit-NeoPot-PCB](https://github.com/adafruit/Adafruit-NeoPot-PCB),
 main branch, downloaded 2026-11-13. These are Adafruit's original reference
 files, not our new PCB. Their LED package placement provides a useful starting
 point for the ALPS pot; verify any replacement LED's pad geometry and orientation.
+
+## Planned illuminated push buttons
+
+The user would like **PB86-A1-style** illuminated momentary push buttons on the
+control board. These are digital switches; they do not consume potentiometer
+ADC channels. Button quantity, function assignments, cap colours, and LED colours
+remain **TBD** and are recorded that way in `MANUAL_PARTS.csv`.
+
+The supplied sourcing example is
+[Tayda A-7701](https://www.taydaelectronics.com/black-push-switch-momentary-spdt-pcb-pins-led-mount.html).
+Tayda identifies this as **ZTDA PS01**, a black-cap, red-LED, PCB-pin momentary
+SPDT switch, with a 12.5 × 17.6 mm outline and 2.0 ±0.4 mm travel. The switch
+contacts are rated 12 mA at 24 VDC. The LED is specified at 1.8–2.4 V with a
+20 mA maximum. The 24 V figure is a contact rating, not a supply to apply to the
+Pico or the LED. These figures belong to Tayda's exact product listing.
+
+A PB86-A1 name on AliExpress is not a complete manufacturer/order-code guarantee.
+Honyone markets a similar PB86 family; the exact supplied switch may have a
+different cap, LED pin arrangement, or mechanical detail. Do not assume Tayda's
+ZTDA PS01, a Honyone PB86-A1 variant, and an unqualified AliExpress listing are
+pin-for-pin interchangeable. Obtain a sample and verify continuity and dimensions
+before locking the board footprint.
+
+Saved reference files:
+
+- [Tayda PS01/A-7701 mechanical drawing](datasheets/Tayda_PS01_A7701_drawing.pdf).
+  Tayda links to a shared drawing named A-6805.pdf; that original source URL is
+  preserved in `button-sources.json`.
+- [Honyone PB86 family sheet](drawings/Honyone_PB86_series.png).
+- [Honyone mechanical drawing](drawings/Honyone_PB86_drawing.jpg).
+- [Honyone order-code diagram](drawings/Honyone_PB86_order_codes.jpg).
+- [Document sources and hashes](button-sources.json).
+
+For a simple active-low digital input, connect COM to ground and the verified
+normally-open contact to a Pico input with a 3.3 V pull-up; leave the normally-closed
+contact unconnected. Confirm actual terminal identification with the purchased
+switch. Debounce in firmware. A larger button count may need an input expander
+or matrix; pin allocation and scan hardware have not been selected yet.
+
+The built-in indicator is a conventional single-colour LED, separate from the
+switch contacts. Give every LED its own current-limiting resistor and size its
+GPIO/driver circuit for the final quantity and supply. As an initial calculation,
+a 1 kΩ resistor from a 3.3 V drive gives about 0.9–1.5 mA for Tayda's stated
+forward-voltage range; validate desired brightness and driver headroom. Do not
+power button LEDs from VREF_2V5. They are not individually addressable NeoPixels;
+the RGB LEDs under the ALPS pots remain a separate illumination circuit.
