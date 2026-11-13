@@ -1,211 +1,158 @@
-# MIDI Grids
-This is based on the Mutable Instruments Grid module. I liked the idea of it but I don't have any eurorack modules so I thought I would make a version that fits in a guitar pedal and triggers sounds via MIDI. This has been written using the C SDK for the Raspberry Pi Pico and includes a number of features the original module didn't have. MIDI Grids supports MIDI via 5-pin DIN and USB, it also supports mono sample playback directly with 8 selectable samples per voice.
+# MIDI Machines
 
-## Run in a browser
+Two independent MIDI random-loop sequencers inspired by Music Thing Modular's
+Turing Machine, using the MIDI Grids Raspberry Pi Pico hardware. Firmware and
+browser compile the same C engine; the webpage uses WebAssembly and includes a
+looped sample synth. The Pico plays the same four waveforms through its PCM5102A
+audio output.
 
-Open [MIDI Grids online](https://abux77.github.io/MIDI_Grids/) and press **Start**.
+## Controls
 
-The browser app and Pico firmware share the **same C engine**, including pattern data,
-interpolation, chaos, accents, and 24-PPQN transport. The browser runs that C as
-WebAssembly; there is no separate JavaScript pattern implementation.
+| Existing knob | MIDI Machines |
+|---|---|
+| BD | Machine 1 mutation / lock |
+| X | Machine 1 length |
+| SD | Machine 2 mutation / lock |
+| Y | Machine 2 length |
+| HH | Shared pitch range, 1–48 semitones |
+| Chaos | Shared scale |
+| Tempo | 40–240 BPM; quarter / half / full speed with external clock |
 
-The ready-to-run browser build is checked in. To serve it locally from this repository:
+Clockwise locks stored steps, the centre randomizes them, and anticlockwise
+inverts each stored step on successive passes for a loop twice the selected length. Endpoint dead zones make
+locking reliable on physical pots. Length choices are every integer from 0 to 16. Zero mutes that machine and
+pauses its register, preserving the loop until a nonzero length is selected.
+Each machine keeps a bank of 16 stored step values; the low eight bits of each
+value determine pitch. Length selects the first 0–16 steps without overwriting
+the hidden steps. Mutation changes played steps; hidden steps remain intact.
+Start resets playheads while retaining register contents, so locked material is
+preserved. Stop silences notes. Each machine advances every six MIDI clocks
+(one sixteenth note), with velocity 100 and approximately 80% gate length.
+
+Scales: chromatic, major, natural minor, Dorian, Mixolydian, major pentatonic,
+minor pentatonic, harmonic minor, whole tone. Quantization chooses the nearest
+scale tone, preferring the lower note on ties, and stays within MIDI 0–127.
+
+## Browser
 
 ```sh
 python3 -m http.server 8000 --directory web --bind 127.0.0.1
 ```
 
-Open **http://localhost:8000**, then press **Start**. The frontend includes an X/Y
-pattern pad, voice densities, chaos, tempo, a 32-step display, the factory drum
-samples, custom sample loading, mute, and optional Web MIDI input/output.
-See [web/README.md](web/README.md) for building, MIDI, and architecture details.
+Open http://localhost:8000 and click Start. The checked-in `web/machines.wasm`
+is ready to use. Controls and voice settings persist in browser local storage.
+Choose MIDI input/output under **Settings**. Web MIDI requires
+a supporting browser such as Chromium and HTTPS or localhost. Browser sound is
+optional. Enable **Clock & transport only** in Settings to follow MIDI Clock,
+Start, Stop and Continue while ignoring all incoming note and CC messages. This
+filter is saved in this browser and does not affect local controls or MIDI output. Stop and hidden-tab handling release notes and stop playback.
 
-## Flashing your Raspberry Pi Pico
-The compiled firmware is in `build/midi_grids.uf2`. Hold **BOOTSEL** while connecting the Pico, then copy this file to RPI-RP2. Firmware updates write only the firmware region; the last 1 MB is reserved for samples and configuration files. You can access this 1 MB region by holding the Start/Stop button during power up, the region will mount in your computer like a USB drive and you can replace samples and/or edit the configuration file.
+For a silent hardware screen, enable **Use as hardware screen**, select the Pico
+input, then stop/start the hardware. The screen receives full-resolution knob
+CCs, clock and actual played MIDI notes. Register visualization is local to the
+browser instrument: hardware register state is not transferred. Set webpage
+channels to match the hardware so actual notes appear under the correct machine.
+Avoid routing the output back into the input.
 
-## Hardware
-**GPIO Pins**
-| Function | GPIO |
-|---|---|
-| DIN MIDI OUT / IN | GP0 / GP1, UART0, 31250 baud |
-| Kick / snare / hi-hat / tempo LEDs | GP6 / GP7 / GP8 / GP9 |
-| Start/Stop button to ground | GP10, internal pull-up |
-| PCM5102A BCK / LRCLK / DATA | GP11 / GP12 / GP13 |
-| CD74HC4067 S0–S3 / Analog Signal | GP16–GP19 / GP26 |
+## Firmware and serial BOOTSEL
 
-**Knobs**
-1. Bass Drum (BD) - this controls the number of triggers (density) per measure.
-2. Snare Drum (SD) - this controls the number of triggers (density) per measure.
-3. High Hat (HH) - this controls the number of triggers (density) per measure.
-4. X - this adjusts where the drum pattern is selected from in the pattern map.
-5. Y - this adjusts where the drum pattern is selected from in the pattern map.
-6. Chaos - if this knob is all the way left the drum pattern will stay the same from measure to measure, turning it to the right will increase the randomness of the pattern.
-7. Tempo - this sets the tempo manually if no MIDI clock is detected.
+Flash `build/midi_machines.uf2` to the original RP2040 Pico's RPI-RP2 drive.
+For initial installation, hold the Pico BOOTSEL button while connecting USB.
+Subsequent updates can enter the bootloader through the USB CDC serial port:
 
-**Start/Stop**
-- Starts and stops the playing of samples and MIDI signals.
-- Holding down while booting with enter USB drive mode.
-- Holding down while stopped will allow you to pick a sample for each drum voice by turning it's knob. While turning the knob a preview of each sample will be played back. Release the button to save all of your choices to `SELECT.TXT`
+```text
+bootsel
+```
 
-## MIDI Clock and Transport
+Send the command followed by Enter (115200 baud is fine). Firmware stops playback,
+sends note-offs and Stop, flushes serial/MIDI queues for 100 ms, then calls
+`reset_usb_boot(0, 0)`. RPI-RP2 appears. This command is refused while the
+configuration drive is mounted; safely eject it first. `status` reports clock,
+knobs, registers and voice settings; `test` sends a short Machine 1 root note.
+The inherited `format` command erases the reserved storage partition and restores
+factory files; normal firmware updates preserve that partition.
 
-- Internal tempo: 40–240 BPM; DIN and enabled USB output send 24 PPQN while playing.
-- DIN and enabled USB MIDI input accept Clock, Start, Stop and Continue.
-- The first source sending an accepted realtime message owns sync. The other input is ignored until that source times out; notes and other MIDI input messages are ignored. USB is a **device** connection to a computer/USB host.
-- Start resets the pattern; Continue retains its position; Stop silences voices and ends outgoing clock. Clock alone changes sync source without starting playback.
-- External mode tempo knob: low third = quarter speed, middle third = half speed, high third = full speed. Small hysteresis prevents division chatter.
-- Division changes the drum sequence and tempo LED; outgoing clock is the incoming 24-PPQN stream at its original speed. Accepted transport messages go to both outputs.
-- After **2 seconds without clock**, internal tempo resumes from the knob if playback was running. A stopped transport remains stopped. Adjust `CLOCK_TIMEOUT_US` in `core/transport.h` if needed.
-- Avoid routing the forwarded USB MIDI output back into its input in your DAW.
+## Hardware configuration
 
-## Knob MIDI CC output and browser screen
+Hold Start/Stop while powering on to expose the reserved 1 MiB USB drive.
+Replace `CONFIG.TXT` and safely eject. The unit reloads settings while stopped.
+The webpage's **Download CONFIG.TXT** exports its root/octave/channel settings;
+copy that file onto the hardware drive to apply them. Webpage settings do not
+write hardware flash over MIDI.
 
-The firmware sends knob values on **MIDI channel 1**, over DIN and enabled USB
-MIDI, while playing or stopped. Drum channels in CONFIG.TXT do not change the
-control channel. Each knob sends a standard 14-bit CC pair: the coarse CC is
-usable by ordinary 7-bit controllers; its fine CC preserves exact Pico values in
-the web app. This follows the [MIDI CC MSB/LSB convention](https://midi.org/midi-1-0-control-change-messages).
-
-| Knob | Coarse CC | Fine CC | Native range |
-|---|---|---|---|
-| X | 20 | 52 | 0–255 |
-| Y | 21 | 53 | 0–255 |
-| Kick density | 22 | 54 | 0–255 |
-| Snare density | 23 | 55 | 0–255 |
-| Hi-hat density | 24 | 56 | 0–255 |
-| Chaos | 25 | 57 | 0–255 |
-| Tempo | 26 | 58 | 40–240 BPM |
-
-CC **27** additionally reports effective clock division as value **1, 2, or 4**.
-It reports the division actually used by playback: **1** on internal clock,
-or the selected **1/2/4** division when following external clock. This keeps
-the browser at the same speed as the Pico's forwarded MIDI clock.
-Knob input averages eight ADC readings per scan, then applies a 1/8 exponential
-average (about a 52 ms time constant) and up to 24 ADC counts of hysteresis at each
-native value boundary. This suppresses idle CC jitter while retaining fine knob
-adjustments; it also stabilizes the parameters used by the drum engine.
-Knob updates are capped at 25 per second per knob, with queue space reserved for
-notes and realtime messages. All effective values refresh every two seconds and
-on USB connection, so opening the browser later does not require moving every
-knob. Density CCs reflect the active density during sample selection and pickup.
-
-To use the browser as a screen:
-
-1. Build/flash the updated firmware and connect the Pico USB cable with
-   `USB_MIDI,ON`. A DIN-to-computer MIDI interface also works.
-2. Open the web app, expand **Settings**, and check **Use as hardware screen**.
-3. Click **Enable MIDI**, grant permission, and select the Pico under
-   **MIDI input (knobs & clock)**. Leave MIDI output unselected.
-4. Values synchronize within two seconds; move any knob to see it immediately.
-   Press the Pico Start/Stop button to start the web playhead from the same origin.
-
-Screen mode produces no browser audio or MIDI output. It follows hardware
-Start/Continue/Stop and clock and waits if clock is lost. A clock stream alone
-does not reveal whether hardware was already playing, so stop/start the Pico if
-connecting mid-performance. The map is a preview from the web engine; chaos RNG
-state is not transferred over MIDI, so random future hits can differ between
-engines. The seven parameter values and clock division are synchronized exactly.
-For browser instrument playback controlled by the same knobs, leave screen mode
-off. Incoming CCs are never echoed back.
-
-## USB Drive Mode
-
-1. MIDI Grids has a 1 MB region you can access by holding the Start/Stop button during power up, the region will mount in your computer like a USB drive.
-2. Open the **MIDI GRIDS** volume where you are able to load samples and or edit the configuration file that is in its root directory.
-3. One you have made your changes safely eject the volume. The unit will reboot and the new samples and/or configuration will loaded.
-
-## CONFIG.TXT
-
-Edit `CONFIG.TXT` in the drive root to set each drum's output channel (1–16) and note (0–127), for both DIN and enabled USB output:
-
-Here is the standard MIDI configuration
 ```text
 USB_MIDI,ON
-BD,CH1,N36
-SD,CH1,N38
-HH,CH1,N42
+TM1,CH1,ROOT0,OCT3,SOUND1
+TM2,CH2,ROOT0,OCT3,SOUND2
 ```
 
-Here is a MIDI configuration that works with the OP-Z
-```text
-USB_MIDI,ON
-BD,CH1,N53
-SD,CH2,N53
-HH,CH3,N53
-```
-Enable incoming MIDI on OP-Z and disable `channel_one_to_active` to keep channel 1 routed to kick rather than the active track.
-See https://teenage.engineering/guides/op-z/midi and
-https://teenage.engineering/guides/op-z/tracks .
+Channels: 1–16. ROOT: 0–11 (C–B). OCT: 0–8, where MIDI base note is
+`12 * OCT + ROOT`; OCT3/ROOT0 is MIDI 36 (usually named C2). Browser note labels
+use MIDI 60 = C4. Invalid settings retain defaults; legacy BD/SD/HH entries do
+not configure the machines. `USB_MIDI,OFF` disables USB MIDI after reboot;
+DIN and CDC remain available. Full-line `#` comments are supported.
 
-`USB_MIDI,ON` enables the USB MIDI interface; `USB_MIDI,OFF` disables it. Missing or invalid USB settings default to ON. Changing USB MIDI requires a reboot to update descriptors.
+Hardware pinout is unchanged: UART0 MIDI GP0/GP1; LEDs GP6–GP9; Start/Stop GP10;
+PCM5102A GP11–GP13; mux select GP16–GP19, ADC GP26.
+The first DIN/USB realtime source owns external sync. Start resets phase,
+Continue retains it, Stop silences notes. Clock alone does not start playback.
+After two seconds without clock, running playback resumes internally. Outgoing
+external MIDI clock retains its original rate despite tempo-knob division.
 
-Lines beginning with `#` are ignored by the current parser. Put comments on their own lines; adding a comment after a setting makes that line invalid. Commenting out a drum setting restores its firmware default (CH1 and  36/N38/N42), rather than muting that drum's MIDI.
+CCs retain the original hardware assignments on MIDI channel 1: X/length1=20,
+Y/length2=21, BD/mutation1=22, SD/mutation2=23, HH/range=24, Chaos/scale=25,
+tempo=26. Fine CCs are coarse+32; CC27 reports effective division 1/2/4.
 
-## Loading Samples via USB
+## Build and verify
 
-If providing your own samples they must be uncompressed PCM, **mono, 16-bit, 44,100 Hz** WAV files. Each voice can have 8 samples. Bass Drum (BD) samples are named `BD01.WAV` to `BD08.WAV`. Snare Drum (SD) samples are named `SD01.WAV` to `SD08.WAV`. High Hat (HH) samples are named `HH01.WAV` to `HH08.WAV`
-
-The disk itself has 1 MiB minus filesystem overhead so you will need to be loading short samples. In addition to this all three drum samples must fit into **128 KiB** of RAM (this is about 1.49 seconds total across all three sounds).
-
-A small file can still be rejected for stereo, 8/24-bit, float/compressed encoding, a non-44100 Hz rate, or malformed/truncated WAV chunks.
-
-If you are using a Pico that previously had MicroPython installed you may need to format the 1 MB region. **An old MicroPython installation may leave incompatible data in this region**, so the first installation may need a reset: open the Pico CDC serial port and send `format` followed by Enter. This explicitly **erases the sample partition and restores all 24 supplied factory WAVs**.
-
-## Serial Debug
-It is possible to debug MIDI Grids via a serial monitor. Open the Pico USB CDC port in a serial monitor (115200 baud is fine; USB CDC does not use a physical UART baud rate). Send commands with a newline/Enter:
-
-- `status`: selected sample numbers, loaded frame counts, MIDI settings, and raw knobs.
-- `samples`: discovered numbered slots and the actual drive-root filenames and sizes.
-- `bootsel`: stop playback and reboot into the Pico USB bootloader. The serial port disconnects and **RPI-RP2** appears; copy a UF2 onto it to update firmware. Safely eject the sample drive first if USB drive mode is active. Flash this firmware once using the physical BOOTSEL button to enable the command.
-
-While stopped, hold Start/Stop and turn a drum knob. Each attempted selection logs its filename, file size, WAV encoding/channels/rate/bit depth, PCM size, and RAM usage. Rejected samples print the specific reason and the previous selection is restored.
-
-Send `status` for transport, per-drum MIDI settings and sample numbers, raw pots, sample frame counts, division and dropped-message diagnostics. Send `test` to play the selected bass drum and send its configured MIDI note, even while stopped. All seven pot directions are inverted to match the hardware: clockwise increases values.
-
-## Build
-
-Use the Raspberry Pi Pico VS Code extension to import this CMake project, choose `pico`, and build; or use an installed Pico SDK and ARM compiler:
-```sh
-cmake -S . -B build -G Ninja -DPICO_BOARD=pico -DPICO_SDK_PATH=/path/to/pico-sdk
-cmake --build build
-```
-The current CC-enabled firmware builds with Pico SDK 2.2.0 and Arm GNU toolchain 14.2.Rel1 for the original Pico (RP2040). SDK's TinyUSB submodule and picotool must be installed. No network dependencies are fetched by this project itself. Rebuild embedded defaults after modifying `samples/` or map data:
-```sh
-python3 tools/embed_assets.py
-cmake --build build
-```
-Run portable host tests with `sh tools/test.sh` (C compiler and Python 3 required). They cover interpolation and engine parity, external source locking, 1/2/4 divisions, Start/Stop/Continue, clock loss, FAT provisioning, ownership handoff, sample loading, and preservation of damaged storage. See `docs/HARDWARE_VALIDATION.md` for bench tests.
-
-## Source and Licensing
-
-The Grids map/engine was derived from Emilie Gillet / Mutable Instruments and is licensed GPL-3.0-or-later. See `LICENSE.md`. PVS supplied the flash-disk and MSC ownership implementation; FatFs remains under its included upstream notice. References:
-
-- https://github.com/pichenettes/eurorack/tree/master/grids
-- https://pichenettes.github.io/mutable-instruments-documentation/modules/grids/
-
-## Prepare Samples with FFmpeg
-
-`tools/convert_samples.py` converts numbered drum WAVs in a folder to **mono, 16-bit PCM, 44,100 Hz**, using FFmpeg with triangular dithering. Originals stay untouched; output filenames use uppercase BD/SD/HH plus 01–08. Conversion preserves full lengths and does not normalize volume. Unrecognized WAV names are skipped.
-Python 3 and `ffmpeg` on PATH are required; `ffprobe` is not required.
-
-From this project's folder, run:
+With Pico SDK 2.2.0 (TinyUSB initialized), Arm GNU 14.2.Rel1, CMake and Make/Ninja:
 
 ```sh
-python3 tools/convert_samples.py "/path/to/original-samples" "samples-converted"
+cmake -S . -B build -DPICO_BOARD=pico -DPICO_SDK_PATH=/path/to/pico-sdk
+cmake --build build -j4
 ```
 
-The script verifies every output WAV, reports PCM/file sizes, and checks the largest sample of each drum together against the shared 128 KiB RAM limit. A full library containing all three drum types is needed to check every possible combination. It also estimates library disk usage with 512-byte clusters and a conservative
-32 KiB reserve for filesystem/settings/host files; actual free drive space remains the final check. Exit status is 0 when checks pass, 1 for errors, or 2 when conversion succeeds but sizes exceed a limit. Outputs remain available for inspection on status 2.
+With Clang and lld (or WASI SDK 34):
 
-If RAM checks fail, shorten longer samples in an audio editor or explicitly cap all sounds at 490 ms (this cuts off any longer tails):
 ```sh
-python3 tools/convert_samples.py "/path/to/original-samples" "samples-converted" --overwrite --max-duration 0.49
-```
-Three 490 ms sounds fit in RAM. A library of many sounds can still exceed the 1 MiB disk; reduce its file count or lengths if the disk check fails. Existing output WAVs are protected unless `--overwrite` is supplied for matching filenames. Input and output folders must differ.
-
-Reboot the Pico holding Start/Stop, copy the converted WAVs to the drive root, replace the matching old files, then safely eject. Keep `CONFIG.TXT` and `SELECT.TXT`. Verify selections using the serial monitor. Run  conversion integration checks with:
-```sh
-python3 tests/test_convert_samples.py
+WASM_CC=/path/to/wasi-sdk/bin/clang python3 tools/build_web.py
+sh tools/test.sh
+python3 tests/test_web.py
 ```
 
-The bundled factory library contains eight samples per voice (24 total). In the browser, choose them under **Settings → Browser audio → Factory sample**. Run `python3 tools/embed_assets.py` after changing WAVs to refresh both the firmware assets and browser library. Fresh Pico sample partitions receive the whole library; flashing an existing Pico preserves its sample drive. To update that drive, copy `samples/*.WAV` in USB drive mode and safely eject, keeping `CONFIG.TXT` and `SELECT.TXT`.
+Tests cover both lock endpoints, loop lengths, quantization, deterministic RNG,
+clock divisions, storage settings, full-resolution MIDI controls, browser synth,
+silent hardware screen, and native/WebAssembly event, pitch and register parity.
+Bench verification remains necessary: see [hardware checks](docs/HARDWARE_VALIDATION.md).
+
+`core/turing.c` and `core/machines_sequencer.c` are shared by both platforms.
+`src/main.c` owns Pico I/O; `web/bridge.c` exposes the C engine to the browser;
+`web/app.js` handles UI, scheduling, MIDI and synthesis. Inherited Grids engine,
+sample storage and associated tests remain for reference and future audio work;
+they do not generate the new sequencer's notes.
+
+This project derives from [MIDI Grids](https://github.com/abux77/MIDI_Grids).
+Turing behavior is inspired by [Music Thing Modular](https://www.musicthing.co.uk/Turing-Machine/).
+See [LICENSE.md](LICENSE.md) for inherited licensing and attribution.
+
+## Looped synth sounds
+
+Each machine has a **Sound** selector: Bass, Mellow lead, Bright lead, Organ.
+Browser choices persist locally and are included in the downloaded CONFIG.TXT.
+For hardware, SOUND1–SOUND4 selects these sounds in that order; missing SOUND
+fields default to Bass for Machine 1 and Mellow lead for Machine 2. Copy the
+exported configuration to the hardware drive and safely eject to apply choices.
+
+The four Adventure Kid WAVs in `samples/synth/` are mono PCM16, 600 frames each.
+Loop points cover the entire cycle, from frame 0 to frame 600 (exclusive), allowing
+sustained notes without running out of sample. Tuning uses each cycle's actual
+length and sample rate, not an assumed C3 root. Both platforms use a 5 ms attack,
+a short note gate, and a 20 ms release. Pico playback uses fixed-point phase
+accumulation and linear interpolation, mixing two voices at 44.1 kHz to stereo I²S.
+The browser uses looped Web Audio buffers of the same waveform data. Extreme
+upward transposition can alias; these initial waveforms are not multisampled.
+
+`tools/embed_synth.py` regenerates firmware waveform tables and browser assets.
+The WAVs are by Kristoffer Ekstrand / Adventure Kid, released under CC0-1.0.
+Source URLs are recorded in `samples/synth/manifest.json` and the complete license
+is in `samples/synth/LICENSE.md`.

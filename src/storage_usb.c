@@ -4,8 +4,8 @@
 #include <string.h>
 void tud_msc_inquiry_cb(uint8_t lun, uint8_t vendor[8], uint8_t product[16], uint8_t revision[4]) {
     (void)lun;
-    memcpy(vendor, "GRIDS   ", 8);
-    memcpy(product, "Drum Samples    ", 16);
+    memcpy(vendor, "MACHINES", 8);
+    memcpy(product, "Machine Config  ", 16);
     memcpy(revision, "0200", 4);
 }
 

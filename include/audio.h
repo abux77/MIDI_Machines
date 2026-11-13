@@ -8,3 +8,6 @@ void audio_suspend(void);
 void audio_resume(void);
 
 bool audio_is_active(void);
+
+void audio_note(unsigned part,unsigned wave,unsigned note,unsigned velocity);
+void audio_release(unsigned part);

@@ -26,12 +26,12 @@ compiler = os.environ.get('CC', 'cc')
 browser = os.environ.get('CHROMIUM') or shutil.which('chromium') or shutil.which('google-chrome')
 if not browser:
     raise SystemExit('Chromium required. Set CHROMIUM=/path/to/chromium.')
-with tempfile.TemporaryDirectory(prefix='midi-grids-test-') as temp:
+with tempfile.TemporaryDirectory(prefix='midi-machines-test-') as temp:
     folder = Path(temp)
     native = folder/'bridge.so'
     subprocess.run([compiler, '-shared', '-fPIC', '-std=c11', '-Wall', '-Wextra', '-Werror',
-        '-I'+str(ROOT/'core'), *(str(ROOT/p) for p in ['core/grids.c','core/transport.c',
-        'core/sequencer.c','core/midi_controls.c','web/bridge.c']), '-o', str(native)], check=True)
+        '-I'+str(ROOT/'core'), *(str(ROOT/p) for p in ['core/turing.c','core/transport.c',
+        'core/machines_sequencer.c','core/midi_controls.c','web/bridge.c']), '-o', str(native)], check=True)
     rng = random.Random(77)
     fixtures = []
     params = [[0]*6, [255]*6, [128,128,128,128,128,0]] + [[rng.randrange(256) for _ in range(6)] for _ in range(9)]
@@ -42,14 +42,15 @@ with tempfile.TemporaryDirectory(prefix='midi-grids-test-') as temp:
         lib.web_tick.restype = ctypes.c_uint
         division = [1,2,4][index%3]
         external = index % 2 == 0
-        lib.web_set(*values)
+
+        for c,v in enumerate(values): lib.web_control(c,v)
         lib.web_division(division)
         if external:
             lib.web_receive(0xfa,0)
         else:
             lib.web_start()
         fixtures.append(dict(params=values, division=division, external=external,
-            events=[lib.web_tick() for _ in range(96*(division if external else 1)*3)]))
+            events=[(lib.web_tick(),lib.web_note(0),lib.web_note(1),lib.web_bits(0),lib.web_bits(1)) for _ in range(96*(division if external else 1)*3)]))
     class ControlTx(ctypes.Structure):
         _fields_=[('value',ctypes.c_uint16*8),('sent_at',ctypes.c_uint64*8),('seen',ctypes.c_uint8)]
     control_lib=ctypes.CDLL(str(native))

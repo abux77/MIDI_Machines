@@ -23,3 +23,7 @@ bool sample_select(unsigned part, unsigned number);
 bool selections_save(void); /* Caller must suspend audio during flash writes. */
 
 void samples_report(void); /* Read-only serial diagnostics; no PCM reload. */
+
+extern unsigned machine_channel[2], machine_root[2], machine_octave[2];
+
+extern unsigned machine_sound[2]; /* 0..3, CC0 single-cycle library. */

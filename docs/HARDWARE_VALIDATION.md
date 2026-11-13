@@ -1,66 +1,43 @@
-# Hardware validation — still required
+# MIDI Machines hardware validation
 
-Build and host tests do not establish electrical operation or measured clock jitter.
-On 2026-11-12, firmware was flashed onto a connected original Pico using the CDC
-`bootsel` command. USB serial/MIDI reconnected successfully. A stationary 20-second
-capture showed no changes across all seven knob values after filtering updates.
-Internal clock now reports effective division 1 over CC27; replaying a captured
-576-clock stream through the browser WASM engine produced the same 12 kick hits
-as the hardware, compared with 6 hits under the previous incorrect division 2.
-These checks do not replace the remaining electrical, audio, DIN, and storage
-bench tests below.
+Native and browser tests do not verify electrical operation.
 
-1. Flash the UF2 to an original Pico. Check CDC startup; expect embedded factory audio on incompatible old MicroPython storage.
-   Confirm the disk is preserved; use explicit `format` only to initialize editable storage.
-2. Verify all seven pots, per-drum CONFIG.TXT MIDI settings and four LEDs. Power up stopped;
-   short button release starts/stops. Check clockwise increases all pot values. Check notes 36/38/42 and accents 100/127.
-   Match the drum machine receive channels to CONFIG.TXT (`status`).
-   Use `test` over CDC to isolate MIDI routing from pattern controls.
-3. Scope GP11/12/13: LRCLK approximately 44.1 kHz, BCK approximately 1.4112 MHz,
-   16-bit stereo I²S. Listen to all three factory sounds and overlapping hits.
-4. Capture DIN and USB output: 24 clocks per quarter note, one Start before running,
-   Stop on stopping, no clock while stopped, and no stuck drum notes.
-5. Connect the optocoupler's 3.3 V UART output to GP1. Test external clocks at
-   40/120/240 BPM, Start resetting, Continue resuming, Stop silencing, and clock-only
-   input not starting a stopped sequencer. Repeat from a computer over USB MIDI.
-6. At a fixed incoming tempo, test low/middle/high tempo knob ranges. Drum rate should
-   be quarter/half/full; forwarded clock rate must remain unchanged.
-7. Send clocks to both inputs at different rates: the first active source must win.
-   Unplug it; after two seconds running playback falls back to the internal knob
-   tempo (or another active source takes over). Repeat loss while stopped.
-8. Reboot holding Start/Stop. Confirm no short-press toggle on release,
-   DAC DMA stopped, and USB sample volume available. Replace one valid
-   WAV, safely eject, and verify stopped reload then the new sound on Start.
-9. Set `USB_MIDI,OFF` in CONFIG.TXT and reboot; repeat editing. MIDI USB interface should be absent while CDC and
-   sample-drive access remain. Reboot after changing the switch.
-10. Try a stereo/incorrect-rate WAV, a missing file, an oversized payload, and a
-    malformed/truncated WAV. Check that the voice mutes with a CDC diagnostic while
-    other samples/MIDI still work. Restore valid files and eject.
-11. Reflash firmware and confirm edited samples survive. Confirm ordinary startup
-    never autoformats a nonblank damaged filesystem; use explicit `format` to recover.
-12. Stress maximum density/audio overlaps plus DIN+USB activity. Check CDC `status`
-    for dropped MIDI; measure timing and look for DAC underruns. Check volume/eject
-    behavior on the actual host OS. No endurance or jitter figures are claimed yet.
+On 2026-11-13, `midi_machines.uf2` was rebuilt with Pico SDK 2.2.0 and Arm GNU
+14.2.Rel1, then flashed to Pico E6632C85938C7F31. The existing MIDI Grids CDC
+`bootsel` command successfully entered RPI-RP2. After copying the UF2, the device
+reconnected as Pico MIDI Machines. CDC `status` confirmed stopped transport,
+USB MIDI ON, TM1 on channel 1, TM2 on channel 2, ROOT0/OCT3 for both, and zero
+dropped MIDI messages. The storage partition was preserved. Musical output and step visualization require the checks below.
 
-13. Add sparse numbered samples; while stopped hold Start/Stop and turn each density
-    knob. Check audio previews, no MIDI preview notes, release without starting,
-    density pickup, and selections surviving reboot. Confirm selection is disabled
-    while playing and ordinary long holds never expose the USB drive.
-14. Edit CONFIG.TXT with different drum channels/notes, eject and verify DIN/USB
-    routing. Check invalid entries use defaults and boot-held storage works with USB MIDI disabled.
-    Check USB MIDI changes require reboot, ON/OFF enumerate correctly, CDC remains
-    available, GP14 has no effect, and files numbered 09–16 are ignored.
+Later on 2026-11-13, the looped-waveform version was flashed using MIDI Machines
+CDC BOOTSEL successfully. It reconnected and reported Audio: active, sound 1 for
+TM1 and sound 2 for TM2. The serial test command triggered a short root note.
+This verifies firmware state and command handling, not audible DAC output.
 
-15. Capture channel-1 knob CCs on DIN and USB while stopped and playing: X/Y/K/S/H/
-    chaos/tempo use coarse CC20–26 and fine CC52–58; CC27 reports division 1/2/4.
-    Verify clockwise direction and exact native values after decoding paired CCs,
-    endpoints 0/255 and 40/240 BPM, no stationary spam beyond two-second refresh,
-    at most 25 updates/second/knob, and no audio/clock interruptions when sweeping
-    all knobs. Change drum note channels and confirm control channel stays at 1.
-16. Connect the browser after boot without touching knobs; check all controls
-    populate within two seconds. Enable hardware-screen mode: no duplicate browser
-    sound or MIDI echo, and hardware Start/Stop/Continue drives the playhead.
-    Unplug clock while running; screen must wait rather than free-run. Reconnect,
-    select the port again, and stop/start hardware to align the playhead. Hold
-    sample-select and exercise density pickup; display should retain active
-    density. Confirm standard coarse-only CCs still control the web instrument.
+1. Flash `build/midi_machines.uf2` onto an original RP2040 Pico. Verify CDC and
+   USB MIDI enumerate as MIDI Machines, booting stopped. Verify pitched audio on the PCM5102A after Start.
+2. Check clockwise directions for all seven knobs. BD/X control machine 1;
+   SD/Y machine 2; HH spans 1–48 semitones; Chaos selects nine scales.
+3. Listen to each of SOUND1–SOUND4 at multiple pitches. Verify simultaneous
+   machine playback, correct tuning, sustain without gaps, and release on Stop.
+   Hardware-screen mode must remain silent in the browser.
+4. Capture MIDI: default channels 1 and 2, four notes per quarter per machine,
+   24 clocks per quarter, velocity 100, correct note-offs on Stop.
+4. Check clockwise loops repeat at each of length from 1 to 16 steps after settling.
+   Verify length 0 mutes only that machine and preserves its register.
+   Anticlockwise repeats over twice that length; centre evolves. Test independent
+   length and mutation controls and quantization in all scales.
+5. Test DIN and USB Clock/Start/Continue/Stop, input source arbitration,
+   quarter/half/full external division and two-second clock-loss fallback.
+6. Start/Stop button must toggle transport. Boot holding it must expose the
+   configuration drive without starting playback on release. Change both machine
+   settings, eject, and verify channels/root/octave through CDC `status` and MIDI.
+7. Open the browser hardware screen. Select the Pico input and matching channels.
+   Verify knob snapshots, transport and actual note readouts, with no browser
+   sound or outgoing MIDI. This mode does not mirror hardware register bits.
+8. Send `bootsel` plus newline over CDC during playback. Verify note-offs/Stop,
+   RPI-RP2 enumeration, and a new UF2 flash. Repeat while stopped. While the
+   config drive is mounted, verify the command requests safe ejection first.
+9. Test USB_MIDI OFF/reboot and ON/reboot without losing serial/storage support.
+   Confirm firmware updates preserve existing storage. Existing MIDI Grids
+   CONFIG.TXT needs TM1/TM2 entries to customize this project's machine settings.

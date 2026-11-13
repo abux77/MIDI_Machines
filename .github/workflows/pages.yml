@@ -1,4 +1,4 @@
-name: Publish MIDI Grids web app
+name: Publish MIDI Machines web app
 
 on:
   push:

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Bass",
+    "file": "AKWF_ebass_0001.wav",
+    "url": "https://github.com/KristofferKarlAxelEkstrand/AKWF-FREE/blob/main/AKWF/AKWF_ebass/AKWF_ebass_0001.wav",
+    "download": "https://raw.githubusercontent.com/KristofferKarlAxelEkstrand/AKWF-FREE/main/AKWF/AKWF_ebass/AKWF_ebass_0001.wav"
+  },
+  {
+    "name": "Mellow lead",
+    "file": "AKWF_R_asym_saw_01.wav",
+    "url": "https://github.com/KristofferKarlAxelEkstrand/AKWF-FREE/blob/main/AKWF/AKWF_bw_sawrounded/AKWF_R_asym_saw_01.wav",
+    "download": "https://raw.githubusercontent.com/KristofferKarlAxelEkstrand/AKWF-FREE/main/AKWF/AKWF_bw_sawrounded/AKWF_R_asym_saw_01.wav"
+  },
+  {
+    "name": "Bright lead",
+    "file": "AKWF_saw_0001.wav",
+    "url": "https://github.com/KristofferKarlAxelEkstrand/AKWF-FREE/blob/main/AKWF/AKWF_bw_saw/AKWF_saw_0001.wav",
+    "download": "https://raw.githubusercontent.com/KristofferKarlAxelEkstrand/AKWF-FREE/main/AKWF/AKWF_bw_saw/AKWF_saw_0001.wav"
+  },
+  {
+    "name": "Organ",
+    "file": "AKWF_eorgan_0001.wav",
+    "url": "https://github.com/KristofferKarlAxelEkstrand/AKWF-FREE/blob/main/AKWF/AKWF_eorgan/AKWF_eorgan_0001.wav",
+    "download": "https://raw.githubusercontent.com/KristofferKarlAxelEkstrand/AKWF-FREE/main/AKWF/AKWF_eorgan/AKWF_eorgan_0001.wav"
+  }
+]

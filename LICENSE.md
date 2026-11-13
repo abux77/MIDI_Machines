@@ -19,3 +19,7 @@ Flash storage and USB MSC code were adapted from the user-supplied PVS_C_SDK pro
 The included WAV files were copied from the user's v0.6 project; their original
 sample authorship/license was not supplied, so verify sample redistribution rights
 before publishing the included factory audio.
+
+The four synth waveforms in `samples/synth/` and generated synth tables/browser
+assets are by Kristoffer Ekstrand / Adventure Kid, CC0-1.0. The complete license
+and source manifest are included alongside the WAVs.

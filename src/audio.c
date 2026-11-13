@@ -1,5 +1,5 @@
 #include "audio.h"
-#include "storage.h"
+#include "synth.h"
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
 #include "hardware/dma.h"
@@ -15,18 +15,11 @@ static dma_channel_config configs[2];
 static int channels[2];
 static unsigned sm, program_offset;
 static volatile bool active;
-static unsigned position[3], gain[3];
+static synth_t synth;
 
 static void fill(unsigned buffer) {
     for (unsigned frame = 0; frame < FRAMES; ++frame) {
-        int sum = 0;
-        for (unsigned part = 0; part < 3; ++part) {
-            if (position[part] < sample_frames[part])
-                sum += sample_data[part][position[part]++] * (int)gain[part] / 127;
-        }
-        sum = sum * 160 / 256;
-        if (sum > 32767) sum = 32767;
-        if (sum < -32768) sum = -32768;
+        int sum = synth_next(&synth);
         uint32_t sample = (uint16_t)sum;
         buffers[buffer][frame] = (sample << 16) | sample;
     }
@@ -49,22 +42,20 @@ static void dma_complete(void) {
 
 void audio_stop(void) {
     uint32_t state = save_and_disable_interrupts();
-    for (unsigned part = 0; part < 3; ++part) position[part] = sample_frames[part];
+    synth_stop(&synth);
     restore_interrupts(state);
 }
 
-void audio_trigger(unsigned part, unsigned velocity) {
-    if (part >= 3) return;
-    uint32_t state = save_and_disable_interrupts();
-    gain[part] = velocity;
-    position[part] = 0;
-    restore_interrupts(state);
+void audio_note(unsigned part,unsigned wave,unsigned note,unsigned velocity){
+ uint32_t state=save_and_disable_interrupts();synth_note(&synth,part,wave,note,velocity);restore_interrupts(state);
 }
+void audio_release(unsigned part){uint32_t state=save_and_disable_interrupts();synth_release(&synth,part);restore_interrupts(state);}
+void audio_trigger(unsigned part,unsigned velocity){audio_note(part,part%4,48,velocity);}
 
 void audio_resume(void) {
     uint32_t state = save_and_disable_interrupts();
     memset(buffers, 0, sizeof(buffers));
-    for (unsigned part = 0; part < 3; ++part) position[part] = sample_frames[part];
+    synth_stop(&synth);
     pio_sm_clear_fifos(pio0, sm);
     pio_sm_restart(pio0, sm);
     pio_sm_exec(pio0, sm, pio_encode_jmp(program_offset));

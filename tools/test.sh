@@ -16,3 +16,9 @@ cc -std=c11 -Wall -Wextra -Werror -Icore core/midi_controls.c tests/test_midi_co
 "$task_tmp/midi-controls"
 cc -std=c11 -Wall -Wextra -Werror -Icore tests/test_knob_filter.c -o "$task_tmp/knob-filter"
 "$task_tmp/knob-filter"
+
+cc -std=c11 -Wall -Wextra -Werror -Icore core/turing.c core/transport.c core/machines_sequencer.c tests/test_turing.c -o "$task_tmp/turing"
+"$task_tmp/turing"
+
+cc -std=c11 -Wall -Wextra -Werror -Icore core/synth.c tests/test_synth.c -o "$task_tmp/synth"
+"$task_tmp/synth"

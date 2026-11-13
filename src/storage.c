@@ -47,7 +47,9 @@ DRESULT disk_ioctl(BYTE drive, BYTE command, void *buffer) {
 
 
 bool configured_usb_midi = true;
-static const char default_config[] = "USB_MIDI,ON\nBD,CH1,N36\nSD,CH1,N38\nHH,CH1,N42\n";
+static const char default_config[] = "USB_MIDI,ON\nTM1,CH1,ROOT0,OCT3,SOUND1\nTM2,CH2,ROOT0,OCT3,SOUND2\n";
+unsigned machine_sound[2]={0,1};
+unsigned machine_channel[2]={0,1}, machine_root[2]={0,0}, machine_octave[2]={3,3};
 static const char *drum_names[3] = {"BD", "SD", "HH"};
 unsigned drum_channel[3], drum_note[3] = {36,38,42}, selected_sample[3] = {1,1,1};
 static unsigned available[3];
@@ -70,7 +72,7 @@ static FRESULT provision_factory(void) {
                          .n_root=128, .au_size=512};
     FRESULT result = f_mkfs("", &options, work, sizeof(work));
     if (result == FR_OK) result = f_mount(&filesystem, "", 1);
-    if (result == FR_OK) result = f_setlabel("MIDI GRIDS");
+    if (result == FR_OK) result = f_setlabel("MIDI MACH");
     for (unsigned i=0; i<sizeof(factory)/sizeof(factory[0]) && result==FR_OK; ++i) {
         FIL file;
         UINT written;
@@ -223,6 +225,7 @@ static bool read_line(FIL *file, char line[80]) {
     return got || length || overflow;
 }
 void settings_load(void) {
+    for(unsigned p=0;p<2;p++){machine_channel[p]=p;machine_root[p]=0;machine_octave[p]=3;machine_sound[p]=p;}
     configured_usb_midi = true;
     const unsigned defaults[3] = {36,38,42};
     for (unsigned p=0;p<3;p++) {drum_channel[p]=0;drum_note[p]=defaults[p];selected_sample[p]=1;available[p]=0;}
@@ -230,6 +233,13 @@ void settings_load(void) {
     FIL file; char line[80], name[3], extra; unsigned channel, note;
     if (f_open(&file,"CONFIG.TXT",FA_READ)==FR_OK) {
         while (read_line(&file,line)) {
+            unsigned machine, root, octave, sound;
+            if(sscanf(line,"TM%u,CH%u,ROOT%u,OCT%u,SOUND%u %c",&machine,&channel,&root,&octave,&sound,&extra)==5 && machine>=1 && machine<=2 && channel>=1 && channel<=16 && root<12 && octave<=8 && sound>=1 && sound<=4){
+                machine_channel[machine-1]=channel-1;machine_root[machine-1]=root;machine_octave[machine-1]=octave;machine_sound[machine-1]=sound-1;continue;
+            }
+            if(sscanf(line,"TM%u,CH%u,ROOT%u,OCT%u %c",&machine,&channel,&root,&octave,&extra)==4 && machine>=1 && machine<=2 && channel>=1 && channel<=16 && root<12 && octave<=8){
+                machine_channel[machine-1]=channel-1;machine_root[machine-1]=root;machine_octave[machine-1]=octave;continue;
+            }
             if (!strcmp(line,"USB_MIDI,ON")) {configured_usb_midi=true;continue;}
             if (!strcmp(line,"USB_MIDI,OFF")) {configured_usb_midi=false;continue;}
             if (sscanf(line,"%2[^,],CH%u,N%u %c",name,&channel,&note,&extra)!=3 || channel<1 || channel>16 || note>127) continue;

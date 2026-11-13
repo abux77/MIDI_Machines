@@ -8,7 +8,7 @@ static const tusb_desc_device_t device_descriptor = {
     .bcdUSB = 0x0200, .bDeviceClass = TUSB_CLASS_MISC,
     .bDeviceSubClass = MISC_SUBCLASS_COMMON, .bDeviceProtocol = MISC_PROTOCOL_IAD,
     .bMaxPacketSize0 = CFG_TUD_ENDPOINT0_SIZE,
-    .idVendor = 0xcafe, .idProduct = 0x4017, .bcdDevice = 0x0200,
+    .idVendor = 0xcafe, .idProduct = 0x4018, .bcdDevice = 0x0200,
     .iManufacturer = 1, .iProduct = 2, .iSerialNumber = 3, .bNumConfigurations = 1,
 };
 
@@ -41,8 +41,8 @@ const uint16_t *tud_descriptor_string_cb(uint8_t index, uint16_t language) {
     static uint16_t descriptor[40];
     static char serial[PICO_UNIQUE_BOARD_ID_SIZE_BYTES * 2 + 1];
     static const char *const strings[] = {
-        "", "MIDI Grids", "Pico MIDI Grids", NULL,
-        "Grids Console", "Grids Samples", "Grids MIDI",
+        "", "MIDI Machines", "Pico MIDI Machines", NULL,
+        "Machines Console", "Machines Config", "Machines MIDI",
     };
     size_t length;
     if (index == 0) {

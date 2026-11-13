@@ -13,6 +13,7 @@ bool flash_disk_write(uint32_t o,const void *b,size_t n){if(o>sizeof(disk)||n>si
 int main(void){
  memset(disk,255,sizeof(disk));storage_init();assert(samples_load());assert(sample_frames[0]&&sample_frames[1]&&sample_frames[2]);
  settings_load();assert(drum_channel[0]==0&&drum_note[0]==36&&selected_sample[0]==1&&configured_usb_midi);
+ assert(machine_channel[0]==0&&machine_channel[1]==1&&machine_root[0]==0&&machine_octave[1]==3);
  for(unsigned voice=0;voice<3;voice++) {
   assert(sample_choice(voice,0)==1&&sample_choice(voice,255)==8);
   for(unsigned slot=1;slot<=8;slot++) assert(sample_select(voice,slot)&&samples_load());
@@ -24,6 +25,12 @@ int main(void){
  assert(f_open(&config,"CONFIG.TXT",FA_WRITE|FA_CREATE_ALWAYS)==FR_OK);
  assert(f_write(&config,text,strlen(text),&written)==FR_OK);assert(f_close(&config)==FR_OK);
  settings_load();assert(!configured_usb_midi);assert(drum_channel[0]==9&&drum_note[0]==60&&drum_channel[1]==15&&drum_note[1]==0&&drum_channel[2]==0&&drum_note[2]==42);
+ const char *machines="TM1,CH16,ROOT11,OCT8,SOUND4\nTM2,CH3,ROOT2,OCT4,SOUND3\nTM1,CH2,ROOT0,OCT1,SOUND5\nTM1,CH0,ROOT12,OCT9\nTM2,CH17,ROOT0,OCT0\nTM1,CH1,ROOT0,OCT0 garbage\n";
+ assert(f_open(&config,"CONFIG.TXT",FA_WRITE|FA_CREATE_ALWAYS)==FR_OK);
+ assert(f_write(&config,machines,strlen(machines),&written)==FR_OK);assert(f_close(&config)==FR_OK);
+ settings_load();assert(machine_channel[0]==15&&machine_root[0]==11&&machine_octave[0]==8);
+ assert(machine_channel[1]==2&&machine_root[1]==2&&machine_octave[1]==4);
+ assert(machine_sound[0]==3&&machine_sound[1]==2);
  /* Full-line comments are ignored, absent/invalid USB values default to ON. */
  const char *usb_cases[]={"USB_MIDI,ON\n", "USB_MIDI,OFF\n", "# USB_MIDI,OFF\n", "USB_MIDI,MAYBE\n", ""};
  const bool usb_expected[]={true,false,true,true,true};
