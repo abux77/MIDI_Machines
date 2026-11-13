@@ -11,11 +11,12 @@ PCB layout, or pick-and-place file has been created for this ADC yet.
   grouped by exact LCSC part number, with 33 SMT placements across six part types.
 - [BOM_DETAILS_12_INPUTS.csv](BOM_DETAILS_12_INPUTS.csv): quantities, manufacturer
   part numbers, ratings, purpose, supplier links, and datasheet links.
-- [MANUAL_PARTS.csv](MANUAL_PARTS.csv): twelve separately sourced Alpha RV09BF-40E1
-  B10K transparent-shaft pots, plus twelve planned NeoPixel-compatible LEDs. Full
-  pot ordering suffix and LED package remain to be selected; these are not in the SMT BOM.
-- [datasheets/](datasheets/): local PDF copies for all six SMT part types and the Alpha pot
-  family. The YAGEO
+- [POTENTIOMETER_BOM.csv](POTENTIOMETER_BOM.csv): selected ALPS part and sourcing identifiers.
+- [MANUAL_PARTS.csv](MANUAL_PARTS.csv): twelve separately sourced ALPS RK09K1130D62
+  10 kΩ linear clear-shaft pots, plus twelve planned NeoPixel-compatible LEDs.
+  The LED package remains to be selected; these are not in the SMT BOM.
+- [datasheets/](datasheets/): local PDF copies for all six SMT part types, the selected ALPS pot family, and
+  the earlier Alpha candidate (retained for reference). The YAGEO
   PDFs are the manufacturer's shared general-purpose MLCC series specification.
 - [sourcing.json](sourcing.json): source URLs, download timestamps, PDF SHA-256
   hashes, and verified JLCPCB part mappings. Stock and prices can change.
@@ -129,22 +130,35 @@ These values are a documented prototype starting point, not a bench-validated
 schematic. Recheck stock, part mappings, pin numbers, footprints, and placement
 against the final board before ordering.
 
-## Proposed transparent-shaft pots and NeoPixels
+## Selected clear-shaft pots and planned NeoPixels
 
-User preference: **Taiwan Alpha RV09BF-40E1**, **B10K (10 kΩ linear)**, twelve
-pieces, potentially sourced separately from JLCPCB. Alpha identifies this as a
-9 mm single-unit vertical PCB potentiometer with a transparent shaft, metal
-bushing, and 300° ±5° rotation. Its shaft is a light pipe compatible with an SMD
-LED. The LED is a separate component, not integrated into the potentiometer.
+Selected by the user: **ALPS Alpine RK09K1130D62**, twelve pieces, separately
+sourced and manually assembled. This supersedes the Alpha RV09BF-40E1 proposal.
+The Alpha PDF is retained only as a reference and must not drive the footprint.
 
-See [Alpha_RV09BF_Transparent_Shaft.pdf](datasheets/Alpha_RV09BF_Transparent_Shaft.pdf)
-and [Alpha's original document](https://www.taiwanalpha.com/downloads?id=73&target=products).
-The drawing includes a 165FL shaft option (L = 16.5 mm) for RV09BF-40E1. This is
-an available option shown by the manufacturer, not a confirmed final selection.
-The ordering guide lists 007 for no click and 0C7 for a centre click. Confirm the
-complete shaft/taper/resistance/click order code with the supplier; the base
-RV09BF-40E1 model alone is not a complete purchase specification. Use this exact
-transparent-shaft drawing when making the through-hole footprint and LED keepout.
+- 10 kΩ nominal, linear taper **1B**, ±20%, rated 50 mW.
+- Vertical through-hole construction; shaft length **LM1 = 20 mm**.
+- Clear shaft, **no detent**, and no sleeve/collar on this variant.
+- [POTENTIOMETER_BOM.csv](POTENTIOMETER_BOM.csv) records the exact part and sources.
+- DigiKey: **4809-RK09K1130D62-ND**, [product listing](https://www.digikey.com/en/products/detail/alps-alpine/RK09K1130D62/21721547).
+- LCSC sourcing alternative: **C470399**, [product listing](https://www.lcsc.com/product-detail/C470399.html).
+  An LCSC listing alone does not establish JLCPCB through-hole assembly availability.
+
+Manufacturer references:
+
+- [Exact ALPS product page](https://tech.alpsalpine.com/e/products/detail/RK09K1130D62/).
+- [Local ALPS RK09K/RK09D catalog](datasheets/ALPS_RK09K_RK09D.pdf): the product
+  table identifies RK09K1130D62 as the clear-shaft version; use **Drawing 14**.
+- [Exact-part dimensions](drawings/RK09K1130D62_dimensions.gif).
+- [PCB mounting holes](drawings/RK09K1130D62_mounting_holes.gif), viewed from the mounting side.
+- [Terminal layout and circuit](drawings/RK09K1130D62_terminals.gif).
+
+Adafruit's [NeoPot](https://www.adafruit.com/product/6387) uses this exact pot
+with an LED beneath its shaft, demonstrating the intended light-pipe arrangement.
+This does not establish interchangeability with the former Alpha footprint.
+Design PCB/panel support around this pot's actual mounting tabs and dimensions;
+do not assume the Alpha's threaded-bushing mounting is available on this variant.
+The 10 kΩ electrical choice leaves the proposed ADC/reference/filter values intact.
 
 Plan **one NeoPixel-compatible RGB LED behind each pot**, twelve in total. Check
 emitter position, LED height, light-pipe opening, mounting tabs, solder clearance,

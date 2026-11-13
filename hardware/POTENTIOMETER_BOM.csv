@@ -1,0 +1,2 @@
+Designators,Quantity,Manufacturer,Manufacturer Part Number,Resistance,Taper,Package,DigiKey Part Number,LCSC Part #,Source,Assembly,Notes
+"RV1,RV2,RV3,RV4,RV5,RV6,RV7,RV8,RV9,RV10,RV11,RV12",12,ALPS Alpine,RK09K1130D62,10k ohm,Linear (1B),Vertical through-hole,4809-RK09K1130D62-ND,C470399,https://www.digikey.com/en/products/detail/alps-alpine/RK09K1130D62/21721547,Separately sourced / manual assembly,"Clear shaft; 20mm LM1; no detent; use exact-part drawing for footprint and LED clearance. LCSC listing is a sourcing alternative, not a claim of JLCPCB assembly stock."

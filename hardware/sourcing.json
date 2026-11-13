@@ -122,7 +122,7 @@
   {
     "manufacturer": "Taiwan Alpha Electronic Co., Ltd.",
     "model_family": "RV09BF-40E1",
-    "selection_status": "User-proposed family; B10K (10k linear) confirmed; shaft/click ordering suffix pending",
+    "selection_status": "Superseded by user-selected ALPS RK09K1130D62; retained as historical reference only.",
     "quantity": 12,
     "jlcpcb_part": null,
     "assembly": "Separately sourced; manual through-hole assembly",
@@ -134,5 +134,48 @@
     "datasheet_pages": 3,
     "datasheet_downloaded_utc": "2026-11-13T21:24:47.332754+00:00",
     "illumination_plan": "One separate NeoPixel-compatible addressable RGB LED behind each pot; exact LED and supporting parts not selected."
+  },
+  {
+    "manufacturer": "ALPS Alpine",
+    "mpn": "RK09K1130D62",
+    "selection_status": "Selected by user; supersedes Alpha RV09BF-40E1",
+    "quantity": 12,
+    "resistance_ohm": 10000,
+    "taper": "Linear (1B)",
+    "resistance_tolerance_percent": 20,
+    "rated_power_watt": 0.05,
+    "shaft_length_LM1_mm": 20,
+    "detent": "None",
+    "sleeve": "None",
+    "assembly": "Separately sourced; manual through-hole assembly",
+    "digikey_part": "4809-RK09K1130D62-ND",
+    "digikey_url": "https://www.digikey.com/en/products/detail/alps-alpine/RK09K1130D62/21721547",
+    "lcsc_part": "C470399",
+    "lcsc_url": "https://www.lcsc.com/product-detail/C470399.html",
+    "manufacturer_url": "https://tech.alpsalpine.com/e/products/detail/RK09K1130D62/",
+    "datasheet_url": "https://tech.alpsalpine.com/cms.media/product_catalog_rv_02_rk09k_rk09d_en_26d4cb95ac.pdf",
+    "datasheet_file": "datasheets/ALPS_RK09K_RK09D.pdf",
+    "datasheet_sha256": "fa07f9e8d765d2c1c7420397268e050a22a14b256f0a7b0847c9dd5081637ea9",
+    "datasheet_bytes": 504071,
+    "datasheet_downloaded_utc": "2026-11-13T21:30:32.084181+00:00",
+    "drawing_number": 14,
+    "illumination_reference": "https://www.adafruit.com/product/6387",
+    "drawings": [
+      {
+        "file": "drawings/RK09K1130D62_dimensions.gif",
+        "url": "https://tech.alpsalpine.com/cms.media/product_detail_fig_rk09k_d_722_en_2344e7e914.gif",
+        "sha256": "42364c285b47efc8804edce85eff4e7b3e3a9345a3e1b71c7c3b2ccf128a357c"
+      },
+      {
+        "file": "drawings/RK09K1130D62_mounting_holes.gif",
+        "url": "https://tech.alpsalpine.com/cms.media/product_detail_fig_rk09k_d_731_en_ad0d08caa8.gif",
+        "sha256": "db299f0e5598aea52a87d7274acaaa086c385de3ba4ba445c2454af6c216a4d4"
+      },
+      {
+        "file": "drawings/RK09K1130D62_terminals.gif",
+        "url": "https://tech.alpsalpine.com/cms.media/product_detail_fig_rk09k_c_2_en_1d21d343a0.gif",
+        "sha256": "8cdce65d5019781e9819af2ac7a72430ea5d83d5b5e660ad0a33728a4a6810cf"
+      }
+    ]
   }
 ]
