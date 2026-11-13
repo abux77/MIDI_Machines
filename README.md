@@ -35,6 +35,8 @@ scale tone, preferring the lower note on ties, and stays within MIDI 0–127.
 
 ## Browser
 
+[Play MIDI Machines online](https://abux77.github.io/MIDI_Machines/).
+
 ```sh
 python3 -m http.server 8000 --directory web --bind 127.0.0.1
 ```
