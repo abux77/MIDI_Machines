@@ -1,0 +1,128 @@
+# Twelve-pot SPI ADC hardware proposal
+
+Proposed next-board input circuit for MIDI Machines, also suitable for MIDI Grids.
+The existing Pico firmware still uses the CD74HC4067 mux and built-in ADC; this
+folder documents a future hardware revision. No firmware pin mapping, schematic,
+PCB layout, or pick-and-place file has been created for this ADC yet.
+
+## Files
+
+- [JLCPCB_BOM_12_INPUTS.csv](JLCPCB_BOM_12_INPUTS.csv): standard JLCPCB BOM columns,
+  grouped by exact LCSC part number, with 33 SMT placements across six part types.
+- [BOM_DETAILS_12_INPUTS.csv](BOM_DETAILS_12_INPUTS.csv): quantities, manufacturer
+  part numbers, ratings, purpose, supplier links, and datasheet links.
+- [MANUAL_PARTS.csv](MANUAL_PARTS.csv): twelve 10 kΩ linear pots, pending mechanical
+  selection. Pots are not assigned an unverified footprint or included in the SMT BOM.
+- [datasheets/](datasheets/): local PDF copies for all six SMT part types. The YAGEO
+  PDFs are the manufacturer's shared general-purpose MLCC series specification.
+- [sourcing.json](sourcing.json): source URLs, download timestamps, PDF SHA-256
+  hashes, and verified JLCPCB part mappings. Stock and prices can change.
+
+This is an input-stage BOM for one board, not a complete MIDI Machines pedal BOM.
+The Pico, MIDI circuitry, audio DAC, LEDs, buttons, connectors, power circuitry,
+panel hardware, and enclosure remain outside its scope. Designators here are
+provisional and must match the final schematic and PCB before an assembly order.
+JLCPCB assembly additionally needs manufacturing and placement files from that PCB.
+Manufacturer PDFs retain their original ownership and notices.
+
+## Selected parts
+
+| Part | JLCPCB/LCSC | Quantity | Role |
+|---|---|---:|---|
+| AD7490BRUZ-REEL7 | C36884 | 1 | 16-channel, 12-bit SPI ADC |
+| REF3125AIDBZR | C33297 | 1 | 2.5 V reference and potentiometer excitation |
+| 0603WAF1000T5E | C22775 | 12 | 100 Ω, 1%, 0603 wiper resistors |
+| CC0603KRX7R9BB104 | C14663 | 3 | 100 nF, 50 V, X7R, 0603 |
+| CC0603KRX7R7BB105 | C106248 | 14 | 1 µF, 16 V, X7R, 0603 |
+| GRM21BR71C106KE51L | C408142 | 2 | 10 µF, 16 V, X7R, 0805 |
+
+All three capacitor selections use X7R and meet the requested >=10 V rating.
+Check effective capacitance at operating DC bias using the manufacturer's data.
+The ADC, reference, 1 µF and 10 µF capacitors are Extended parts; the 100 Ω
+resistor and 100 nF capacitor are Basic parts. Recheck classifications when ordering.
+
+## Reference and power wiring
+
+Use the Pico's 3V3(OUT) supply, not ADC_VREF, for the proposed 3.3 V rail.
+
+| Designator | Connection |
+|---|---|
+| U2 pin 1 (IN) | 3.3 V |
+| U2 pin 2 (OUT) | VREF_2V5: U1 REFIN and upper ends of all pots |
+| U2 pin 3 (GND) | Ground |
+| C1, 1 µF | U2 IN to ground, close to U2 |
+| C2, 1 µF | U2 OUT to ground, close to U2 |
+| U1 VDD | 3.3 V; C4 (100 nF) and C5 (10 µF) to AGND |
+| U1 VDRIVE | 3.3 V; C6 (100 nF) and C7 (10 µF) to AGND |
+| U1 REFIN | VREF_2V5; C3 (100 nF) to AGND, close to U1 |
+| U1 AGND pins | Ground plane |
+
+Configure U1 for straight-binary output and the 0–REFIN range (RANGE = 1).
+The usable input range is then 0–2.5 V. Do not power the pots from 3.3 V with
+this range setting. The ADC itself still needs 3.3 V, not the 2.5 V reference.
+Use 3.3 V SPI signaling and a common ground with the Pico.
+
+Twelve nominal 10 kΩ pots draw 3 mA; sixteen draw 4 mA. At -20% resistance
+tolerance those become 3.75 mA and 5 mA, respectively, plus ADC reference current.
+REF3125 can source up to 10 mA, so the proposed pot load does not require a
+separate buffer. Do not attach LEDs or other unrelated loads to VREF_2V5.
+
+## Per-input filter
+
+```text
+VREF_2V5 ─── top of 10k linear pot
+AGND ─────── bottom of pot
+
+pot wiper ── 100 Ω ──┬── U1 VINn
+                     │
+                    1 µF
+                     │
+                    AGND
+```
+
+RV1–RV12 connect to VIN0–VIN11. R1–R12 are their series resistors;
+C8–C19 are their filter capacitors in matching order. Place the capacitors near
+U1. Leave VIN12–VIN15 out of the scan and tie them to AGND if unused.
+
+At the middle of a nominal 10 kΩ pot, the source resistance is 2.5 kΩ. Including
+the 100 Ω resistor, the filter time constant is at most about 2.6 ms nominal
+(about 3.1 ms for a +20% pot, before capacitor/resistor tolerances). At an end stop
+it is about 0.1 ms. That smooths fast changes while remaining responsive to knob
+movement. The local capacitor also supplies the ADC's sampling charge.
+
+Start around 500 readings per second per active input (6,000 conversions/second
+for twelve pots). Validate acquisition timing, channel settling, noise, crosstalk,
+and effective resolution at the chosen SPI speed; do not assume a pot can directly
+drive this ADC at its maximum advertised conversion rate. Retain software smoothing.
+A firmware driver must handle the AD7490's channel-selection timing and returned
+channel IDs correctly.
+
+## Layout and expansion
+
+Use a continuous ground plane and short local analog return paths. Route SPI,
+I²S, and high-current digital returns away from pot/reference traces. Avoid
+splitting the ground plane underneath signal routes. Place each high-frequency
+bypass capacitor directly by its associated pin, with a short return to ground.
+
+To populate all sixteen inputs later, add four pots, four 100 Ω resistors, and
+four 1 µF filter capacitors. No change to the ADC or reference is required for
+that nominal load, but update the schematic, designators, BOM, and firmware scan.
+
+## Source documents
+
+The local AD7490 PDF is manufacturer Rev. D from a mirror because the current
+manufacturer download was unavailable from this environment. The current Rev. E
+manufacturer link is below and in `sourcing.json`; review it before final design.
+The REF31xx local PDF is Rev. E (April 2026). Passive PDFs are manufacturer family
+specifications supplied by LCSC, not guaranteed part-specific characterization sheets.
+
+
+- [Analog Devices AD7490 datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/ad7490.pdf):
+  reference requirements, input range, acquisition, serial interface, and layout.
+- [TI REF31xx datasheet](https://www.ti.com/lit/gpn/REF31): REF3125 pinout,
+  2.5 V output, input bypassing, and output-current capability.
+- Passive-component supplier pages and PDF download URLs are in `sourcing.json`.
+
+These values are a documented prototype starting point, not a bench-validated
+schematic. Recheck stock, part mappings, pin numbers, footprints, and placement
+against the final board before ordering.

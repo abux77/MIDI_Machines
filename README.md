@@ -158,3 +158,9 @@ upward transposition can alias; these initial waveforms are not multisampled.
 The WAVs are by Kristoffer Ekstrand / Adventure Kid, released under CC0-1.0.
 Source URLs are recorded in `samples/synth/manifest.json` and the complete license
 is in `samples/synth/LICENSE.md`.
+
+## Proposed SPI input hardware
+
+See [hardware/README.md](hardware/README.md) for the twelve-pot AD7490 / REF3125
+input-stage proposal, local datasheets, and JLCPCB BOM. The existing mux-based
+firmware and hardware pinout are unchanged.

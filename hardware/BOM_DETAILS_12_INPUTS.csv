@@ -1,0 +1,7 @@
+Designators,Quantity,Manufacturer,Manufacturer Part Number,Value and Ratings,Package,LCSC Part #,Purpose,JLCPCB URL,Datasheet
+U1,1,Analog Devices,AD7490BRUZ-REEL7,16-channel 12-bit SPI ADC,TSSOP-28,C36884,SPI potentiometer acquisition,https://jlcpcb.com/partdetail/AD7490BRUZ_REEL7/C36884,datasheets/AD7490BRUZ-REEL7.pdf
+U2,1,Texas Instruments,REF3125AIDBZR,2.5V reference; source/sink 10mA,SOT-23-3,C33297,ADC reference and potentiometer supply,https://jlcpcb.com/partdetail/REF3125AIDBZR/C33297,datasheets/REF3125AIDBZR.pdf
+"R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12",12,UNI-ROYAL,0603WAF1000T5E,100 ohm +/-1%; 100mW,0603,C22775,One series resistor per pot wiper,https://jlcpcb.com/partdetail/0603WAF1000T5E/C22775,datasheets/0603WAF1000T5E.pdf
+"C3,C4,C6",3,YAGEO,CC0603KRX7R9BB104,100nF +/-10%; 50V; X7R,0603,C14663,REFIN and ADC supply decoupling,https://jlcpcb.com/partdetail/CC0603KRX7R9BB104/C14663,datasheets/CC0603KRX7R9BB104.pdf
+"C1,C2,C8,C9,C10,C11,C12,C13,C14,C15,C16,C17,C18,C19",14,YAGEO,CC0603KRX7R7BB105,1uF +/-10%; 16V; X7R,0603,C106248,Reference input/output plus twelve ADC input filters,https://jlcpcb.com/partdetail/CC0603KRX7R7BB105/C106248,datasheets/CC0603KRX7R7BB105.pdf
+"C5,C7",2,Murata,GRM21BR71C106KE51L,10uF +/-10%; 16V; X7R,0805,C408142,ADC VDD and VDRIVE bulk decoupling,https://jlcpcb.com/partdetail/GRM21BR71C106KE51L/C408142,datasheets/GRM21BR71C106KE51L.pdf
