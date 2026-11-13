@@ -179,3 +179,17 @@ See [Adafruit's NeoPixel wiring guidance](https://learn.adafruit.com/adafruit-ne
 for general supply, data-level, and grounding considerations. The LED driver,
 control behavior, power-support BOM, and firmware support are future work; the
 existing six-line JLCPCB BOM continues to cover only the ADC input stage.
+
+## Adafruit NeoPot design reference
+
+The original Eagle files are saved in
+[references/Adafruit-NeoPot-PCB/](references/Adafruit-NeoPot-PCB/):
+
+- [Schematic](<references/Adafruit-NeoPot-PCB/Adafruit NeoPot Breakout.sch>)
+- [PCB layout](<references/Adafruit-NeoPot-PCB/Adafruit NeoPot Breakout.brd>)
+- Original README and license.txt, retained with the unmodified reference files.
+
+Source: [Adafruit-NeoPot-PCB](https://github.com/adafruit/Adafruit-NeoPot-PCB),
+main branch, downloaded 2026-11-13. These are Adafruit's original reference
+files, not our new PCB. Their LED package placement provides a useful starting
+point for the ALPS pot; verify any replacement LED's pad geometry and orientation.
