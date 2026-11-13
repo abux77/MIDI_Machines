@@ -11,9 +11,11 @@ PCB layout, or pick-and-place file has been created for this ADC yet.
   grouped by exact LCSC part number, with 33 SMT placements across six part types.
 - [BOM_DETAILS_12_INPUTS.csv](BOM_DETAILS_12_INPUTS.csv): quantities, manufacturer
   part numbers, ratings, purpose, supplier links, and datasheet links.
-- [MANUAL_PARTS.csv](MANUAL_PARTS.csv): twelve 10 kΩ linear pots, pending mechanical
-  selection. Pots are not assigned an unverified footprint or included in the SMT BOM.
-- [datasheets/](datasheets/): local PDF copies for all six SMT part types. The YAGEO
+- [MANUAL_PARTS.csv](MANUAL_PARTS.csv): twelve separately sourced Alpha RV09BF-40E1
+  B10K transparent-shaft pots, plus twelve planned NeoPixel-compatible LEDs. Full
+  pot ordering suffix and LED package remain to be selected; these are not in the SMT BOM.
+- [datasheets/](datasheets/): local PDF copies for all six SMT part types and the Alpha pot
+  family. The YAGEO
   PDFs are the manufacturer's shared general-purpose MLCC series specification.
 - [sourcing.json](sourcing.json): source URLs, download timestamps, PDF SHA-256
   hashes, and verified JLCPCB part mappings. Stock and prices can change.
@@ -126,3 +128,40 @@ specifications supplied by LCSC, not guaranteed part-specific characterization s
 These values are a documented prototype starting point, not a bench-validated
 schematic. Recheck stock, part mappings, pin numbers, footprints, and placement
 against the final board before ordering.
+
+## Proposed transparent-shaft pots and NeoPixels
+
+User preference: **Taiwan Alpha RV09BF-40E1**, **B10K (10 kΩ linear)**, twelve
+pieces, potentially sourced separately from JLCPCB. Alpha identifies this as a
+9 mm single-unit vertical PCB potentiometer with a transparent shaft, metal
+bushing, and 300° ±5° rotation. Its shaft is a light pipe compatible with an SMD
+LED. The LED is a separate component, not integrated into the potentiometer.
+
+See [Alpha_RV09BF_Transparent_Shaft.pdf](datasheets/Alpha_RV09BF_Transparent_Shaft.pdf)
+and [Alpha's original document](https://www.taiwanalpha.com/downloads?id=73&target=products).
+The drawing includes a 165FL shaft option (L = 16.5 mm) for RV09BF-40E1. This is
+an available option shown by the manufacturer, not a confirmed final selection.
+The ordering guide lists 007 for no click and 0C7 for a centre click. Confirm the
+complete shaft/taper/resistance/click order code with the supplier; the base
+RV09BF-40E1 model alone is not a complete purchase specification. Use this exact
+transparent-shaft drawing when making the through-hole footprint and LED keepout.
+
+Plan **one NeoPixel-compatible RGB LED behind each pot**, twelve in total. Check
+emitter position, LED height, light-pipe opening, mounting tabs, solder clearance,
+and PCB-to-panel spacing before choosing the LED footprint. Addressable LEDs
+can be daisy-chained DIN/DOUT; their exact data timing and current depend on the
+selected part. Keep the mechanical and electrical LED choices open until then.
+
+Power the LEDs from a suitably rated LED supply, never from the 2.5 V reference.
+Use a common ground plane, but route LED power/return currents away from the
+ADC reference and pot-wiper paths. For 5 V LEDs, plan suitable 3.3-to-5 V data
+level shifting unless the selected LED's datasheet explicitly guarantees 3.3 V
+input logic at that supply. Provide the selected LED's local bypass capacitors,
+input protection/data-series resistor, and supply bulk capacitance as appropriate.
+Budget current using the exact LED's specified worst-case draw and supply limits;
+do not assume the Pico's 3.3 V output or a low-power USB connection can supply it.
+
+See [Adafruit's NeoPixel wiring guidance](https://learn.adafruit.com/adafruit-neopixel-uberguide/best-practices)
+for general supply, data-level, and grounding considerations. The LED driver,
+control behavior, power-support BOM, and firmware support are future work; the
+existing six-line JLCPCB BOM continues to cover only the ADC input stage.

@@ -118,5 +118,21 @@
     "datasheet_bytes": 376027,
     "datasheet_pages": 34,
     "download_note": "Manufacturer GRM-series specification from supplier listing; check the exact part DC-bias curves during layout."
+  },
+  {
+    "manufacturer": "Taiwan Alpha Electronic Co., Ltd.",
+    "model_family": "RV09BF-40E1",
+    "selection_status": "User-proposed family; B10K (10k linear) confirmed; shaft/click ordering suffix pending",
+    "quantity": 12,
+    "jlcpcb_part": null,
+    "assembly": "Separately sourced; manual through-hole assembly",
+    "manufacturer_url": "https://www.taiwanalpha.com/downloads?id=73&target=products",
+    "datasheet_url": "https://www.taiwanalpha.com/downloads?id=73&target=products",
+    "datasheet_file": "datasheets/Alpha_RV09BF_Transparent_Shaft.pdf",
+    "datasheet_sha256": "6d300174d0e2dd697f92b2efa6c87b00be3b4e6e50954bc4473c0129bc47781e",
+    "datasheet_bytes": 399312,
+    "datasheet_pages": 3,
+    "datasheet_downloaded_utc": "2026-11-13T21:24:47.332754+00:00",
+    "illumination_plan": "One separate NeoPixel-compatible addressable RGB LED behind each pot; exact LED and supporting parts not selected."
   }
 ]
