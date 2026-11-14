@@ -31,7 +31,7 @@ with tempfile.TemporaryDirectory(prefix='midi-machines-test-') as temp:
     native = folder/'bridge.so'
     subprocess.run([compiler, '-shared', '-fPIC', '-std=c11', '-Wall', '-Wextra', '-Werror',
         '-I'+str(ROOT/'core'), *(str(ROOT/p) for p in ['core/turing.c','core/transport.c',
-        'core/machines_sequencer.c','core/midi_controls.c','core/note_mask.c','web/bridge.c']), '-o', str(native)], check=True)
+        'core/machines_sequencer.c','core/midi_controls.c','core/note_mask.c','core/secondary_controls.c','web/bridge.c']), '-o', str(native)], check=True)
     rng = random.Random(77)
     fixtures = []
     params = [[0]*6, [255]*6, [128,128,128,128,128,0]] + [[rng.randrange(256) for _ in range(6)] for _ in range(9)]
@@ -62,7 +62,15 @@ with tempfile.TemporaryDirectory(prefix='midi-machines-test-') as temp:
         message=(ctypes.c_uint8*6)()
         count=control_lib.midi_controls_poll(ctypes.byref(state),index,value,100000,message)
         control_messages.append(list(message[:count]))
-    control_fixture=dict(values=control_values,messages=control_messages)
+    class SecondaryTx(ctypes.Structure):
+        _fields_=[('value',ctypes.c_uint*6),('sent_at',ctypes.c_uint64*6),('seen',ctypes.c_uint)]
+    control_lib.secondary_controls_poll.argtypes=[ctypes.POINTER(SecondaryTx),ctypes.c_uint,ctypes.c_uint,ctypes.c_uint64,ctypes.POINTER(ctypes.c_uint8)]
+    secondary_state=SecondaryTx();secondary_values=[4,2,5,4,7,7];secondary_messages=[]
+    for index,value in enumerate(secondary_values):
+        message=(ctypes.c_uint8*3)()
+        count=control_lib.secondary_controls_poll(ctypes.byref(secondary_state),index,value,100000,message)
+        secondary_messages.append(list(message[:count]))
+    control_fixture=dict(values=control_values,messages=control_messages,secondaryValues=secondary_values,secondaryMessages=secondary_messages)
     control_lib.note_mask.restype=ctypes.c_uint16
     mask_fixtures=[[length,amount,variation,control_lib.note_mask(length,amount,variation)] for length in [1,3,8,15,16] for amount in [0,25,50,75,94,100] for variation in range(64)]
     class Handler(http.server.SimpleHTTPRequestHandler):

@@ -14,11 +14,14 @@
 #include "audio.h"
 #include "machine_editor.h"
 #include "note_mask.h"
+#include "panel_controls.h"
+#include "secondary_controls.h"
 bool usb_midi_enabled;
 static turing_t engine=TURING_INIT;
 static transport_t transport={.division=1};
 static unsigned bpm=120,held_notes,gate_ticks;
 static bool ignore_release;
+static panel_controls_t panel;
 static uint8_t playing_note[2], playing_channel[2];
 static void apply_settings(void){for(unsigned p=0;p<2;p++){engine.machine[p].channel=machine_channel[p];engine.machine[p].root=machine_root[p];engine.machine[p].octave=machine_octave[p];}}
 static uint64_t led_until[4],test_note_until;
@@ -32,6 +35,7 @@ static void send(const uint8_t *data,unsigned n){
  }
 }
 static midi_controls_tx_t knob_cc;
+static secondary_controls_tx_t secondary_cc;
 static void control_cc(unsigned control,unsigned value,uint64_t now){
  /* Leave queue headroom for notes and realtime clock; retry on the next scan. */
  if(din_head-din_tail>512-64)return;
@@ -44,7 +48,7 @@ static void note(unsigned p,unsigned velocity){if(velocity){playing_note[p]=engi
 static void output_service(void){
  static bool midi_was_mounted;
  bool mounted=usb_midi_enabled&&tud_midi_mounted();
- if(mounted&&!midi_was_mounted)knob_cc.seen=0; /* Snapshot on USB connection. */
+ if(mounted&&!midi_was_mounted){knob_cc.seen=0;secondary_cc.seen=0;} /* Snapshot on USB connection. */
  midi_was_mounted=mounted;
  while(din_tail!=din_head&&uart_is_writable(uart0))uart_putc_raw(uart0,din_queue[din_tail++&511]);
  if(!tud_midi_mounted()){usb_tail=usb_head;return;}
@@ -104,7 +108,20 @@ static void controls_service(uint64_t now){
  unsigned clockwise_raw=knob_filters[p].raw;
  raw_pots[p]=4095-clockwise_raw;
  unsigned r=p==6?pot_u8(clockwise_raw):value;
- if(p<6)turing_control(&engine,p,r);
+ if(p<4||p==5){
+  unsigned slot=p==5?4:p;
+  /* Freeze the main function immediately on raw button down, before debounce. */
+  if(panel.held||gpio_get(10)){
+   if(panel_knob(&panel,slot,r)){
+    unsigned machine=p%2;
+    if(p<2){unsigned octave=panel_choice(r,9,machine_octave[machine]);if(octave!=machine_octave[machine]){machine_octave[machine]=octave;apply_settings();printf("TM%u octave %u\n",machine+1,octave);}}
+    else if(p<4){unsigned sound=panel_choice(r,5,machine_sound[machine]);if(sound!=machine_sound[machine]){machine_sound[machine]=sound;printf("TM%u sound %u\n",machine+1,sound+1);}}
+    else{unsigned root=panel_choice(r,12,machine_root[0]);if(root!=machine_root[0]||root!=machine_root[1]){machine_root[0]=machine_root[1]=root;apply_settings();static const char *names[]={"C","C#","D","D#","E","F","F#","G","G#","A","A#","B"};printf("Both machines root %s\n",names[root]);}}
+   }
+  }
+  r=panel.value[slot];turing_control(&engine,p,r);
+ }
+ else if(p<6)turing_control(&engine,p,r);
  else{bpm=40+value;
   /* Hysteresis around the third boundaries prevents noisy division changes. */
   if(transport.division==1&&r<165)transport.division=r<80?4:2;
@@ -114,6 +131,13 @@ static void controls_service(uint64_t now){
  value=p==6?bpm:r;
  control_cc(p,value,now);
  if(p==6)control_cc(MIDI_CONTROL_DIVISION,transport_effective_division(&transport),now);
+ if(p==6){
+  unsigned settings[6]={machine_sound[0],machine_sound[1],machine_octave[0],machine_octave[1],machine_root[0],machine_root[1]};
+  for(unsigned i=0;i<SECONDARY_CONTROLS;i++){
+   if(din_head-din_tail>512-64||(usb_midi_enabled&&tud_midi_mounted()&&usb_head-usb_tail>128-16))break;
+   uint8_t bytes[3];if(secondary_controls_poll(&secondary_cc,i,settings[i],now,bytes))send(bytes,3);
+  }
+ }
  p=(p+1)%7;
 }
 static void button_service(uint64_t now){
@@ -121,8 +145,9 @@ static void button_service(uint64_t now){
  bool value=gpio_get(10);if(value!=previous){previous=value;changed=now;}
  if(value==stable||now-changed<30000)return;
  stable=value;
- if(!value)return;
+ if(!value){if(!ignore_release&&!storage_edit_active())panel_hold(&panel);return;}
  if(ignore_release){ignore_release=false;return;}
+ if(!panel_release(&panel))return;
  if(storage_edit_active())return;
  transport.running=!transport.running;
  if(transport.running){stop_sound();turing_reset(&engine);transport.phase=transport.count=0;transport.next_tick=now+60000000/(bpm*24);realtime(0xfa);}else{stop_sound();realtime(0xfc);}

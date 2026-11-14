@@ -74,6 +74,14 @@ $('screen').onchange=()=>{stop();refreshSteps();$('start').disabled=isScreen();$
 function service(){if(!e)return;const now=performance.now(),period=60000000/(+$('tempo').value*24);if(isScreen())return;e.web_timeout(Math.floor(now),Math.round(period));if(!e.web_running()||e.web_source())return;const t=audio?.currentTime||0;if(next<t-.1)next=t+.01;while(next<t+.06){send([0xf8],now+(next-t)*1000);tick(next);next+=period/1e6;}}
 function receive(ev){if(receiveHardware(ev.data))return;if(document.hidden)return;const [s,a,b]=ev.data,now=Math.floor(performance.now());if(s>=0xf8){const accepted=e.web_receive(s,now);if(!accepted)return;if(s===0xfa||s===0xfc){silence();displays.length=0;}if(isScreen()){$('status').textContent=e.web_running()?'Hardware screen · playing':'Hardware screen · stopped';return;}if(s!==0xf8||e.web_running())send([s]);if(s===0xf8&&e.web_running())tick(audio?.currentTime||0);$('status').textContent=e.web_running()?'Playing · external clock':'Stopped';return;}
  if($('clockOnly').checked)return;
+ const secondary=e.web_secondary_cc(s,a,b);
+ if(secondary){
+  const control=(secondary>>>16)-1,value=secondary&65535;
+  if(lastSecondary[control]===value)return;
+  lastSecondary[control]=value;
+  const p=control%2,field=control<2?'sound':control<4?'octave':'root',id=control<2?'voiceSound':field;
+  voices[p][field]=value;$(id+p).value=value;e.web_config(p,voices[p].root,voices[p].octave,voices[p].channel);refreshSteps();persist();return;
+ }
  const decoded=e.web_cc(s,a,b);if(decoded){const c=(decoded>>>16)-1,v=decoded&65535;if(c<6)setControl(c,v);else if(c===6){$('tempo').value=v;refresh();}else e.web_division(v);return;}
  if(isScreen()&&(s&0xf0)===0x90&&b>0){for(let p=0;p<2;p++)if((s&15)===voices[p].channel)draw(p,a,null,-1);}}
 const hardwareReply=new HardwareReply();
@@ -104,17 +112,19 @@ function receiveHardware(data){
    for(const [field,id,offset]of [['root','root',0],['octave','octave',0],['channel','channel',1],['sound','voiceSound',0],['noteMask','noteMask',0]])$(id+p).value=v[field]+offset;
    updateMaskLabel(p);
   }
+  lastSecondary.splice(0,6,voices[0].sound,voices[1].sound,voices[0].octave,voices[1].octave,voices[0].root,voices[1].root);
   $('subdivision').value=values[12];e?.web_subdivision(values[12]);refreshSteps();persist();
   $('hardwareStatus').textContent='Connected · settings applied for this session. Download CONFIG.TXT to save across reboots.';updateHardwareButtons();
  }catch(err){hardwareFailure(err.message);}
  return true;
 }
 $('readHardware').onclick=()=>requestHardware();$('applyHardware').onclick=()=>requestHardware(true);
+const lastSecondary=Array(6);
 let manualMidiInput=false;
 function selectMidiInput(port){
  if(input===port)return;
  stop();if(input)input.onmidimessage=null;e?.web_cc_reset();
- input=port;hardwareReady=false;updateHardwareButtons();
+ input=port;lastSecondary.fill(undefined);hardwareReady=false;updateHardwareButtons();
  if(input){input.onmidimessage=receive;$('status').textContent='MIDI input · '+input.name;}
 }
 function ports(){
@@ -161,4 +171,4 @@ $('download').onclick=()=>{const txt='LIBRARY,2\nUSB_MIDI,ON\nSUBDIV,'+$('subdiv
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});window.addEventListener('pagehide',()=>stop());
 document.addEventListener('keydown',ev=>{if(ev.code==='Space'&&!['INPUT','SELECT','BUTTON'].includes(document.activeElement.tagName)){ev.preventDefault();if(!isScreen())e?.web_running()?stop():$('start').click();}});
 refresh();
-try{await wavesReady;const response=await fetch('machines.wasm?v=step-notes-1');if(!response.ok)throw Error('Cannot load machines.wasm');const module=await WebAssembly.instantiate(await response.arrayBuffer());e=module.instance.exports;e.web_subdivision(+$('subdivision').value);controls.forEach((v,c)=>e.web_control(c,v));voices.forEach((v,p)=>e.web_config(p,v.root,v.octave,v.channel));refreshSteps();$('start').disabled=false;$('stop').disabled=false;$('status').textContent='Ready';timer=setInterval(service,20);requestAnimationFrame(render);void enableMidi();}catch(err){$('status').textContent='Engine error: '+err.message;}
+try{await wavesReady;const response=await fetch('machines.wasm?v=secondary-cc-1');if(!response.ok)throw Error('Cannot load machines.wasm');const module=await WebAssembly.instantiate(await response.arrayBuffer());e=module.instance.exports;e.web_subdivision(+$('subdivision').value);controls.forEach((v,c)=>e.web_control(c,v));voices.forEach((v,p)=>e.web_config(p,v.root,v.octave,v.channel));refreshSteps();$('start').disabled=false;$('stop').disabled=false;$('status').textContent='Ready';timer=setInterval(service,20);requestAnimationFrame(render);void enableMidi();}catch(err){$('status').textContent='Engine error: '+err.message;}

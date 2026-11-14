@@ -188,3 +188,45 @@ for the Pico, not a general MIDI-controller assignment.
 `tools/bin_to_uf2.py build/midi_machines.bin build/midi_machines.uf2` wraps a linked
 RP2040 binary when picotool is unavailable. It rejects images larger than 1 MiB;
 the linker independently enforces the editable volume's boundary.
+
+## Start/Stop modifier controls
+
+Hold the Start/Stop button (GP10) while turning a machine's knob:
+
+| Knob | Normal function | While holding Start/Stop |
+| --- | --- | --- |
+| BD | Machine 1 mutation | Machine 1 sound (five positions) |
+| SD | Machine 2 mutation | Machine 2 sound (five positions) |
+| X | Machine 1 loop length | Machine 1 octave (OCT0–OCT8) |
+| Y | Machine 2 loop length | Machine 2 octave (OCT0–OCT8) |
+| Chaos / Scale | Scale | Shared root note (C through B) |
+
+A normal press/release toggles transport. Deliberate modifier movement suppresses
+that toggle, so releasing after editing leaves playback as it was. Small idle
+knob jitter does not count as an edit. The original mutation/length value stays
+unchanged while editing; after release, turn the knob back through its previous
+position to pick up that original function without a jump. Selectors have boundary
+hysteresis. Changes are live and session-only, like the webpage editor; Read hardware
+retrieves them and exported CONFIG.TXT can save them across reboots. Holding the
+button during boot still enters the existing USB configuration-drive mode.
+
+Holding Start/Stop and turning Scale sets both machine roots together while
+keeping their individual octaves unchanged. The selected scale stays frozen;
+after release, turn through its previous knob position to pick it up again.
+
+## Secondary knob MIDI feedback
+
+Sound, octave and root settings transmit native values on MIDI channel 1:
+
+| Setting | Machine 1 CC | Machine 2 CC | Values |
+| --- | --- | --- | --- |
+| Sound | 28 | 29 | 0–4 (menu order) |
+| Octave | 30 | 31 | 0–8 (OCT setting) |
+| Root | 60 | 61 | 0–11 (C–B) |
+
+Shared-root gestures update both root CCs. Values are sent on DIN and USB after
+changes, on USB connection, and in periodic two-second snapshots. The webpage
+updates its sound selectors, octaves, roots, pitch engine and note squares from
+these messages. Unchanged secondary snapshots do not overwrite pending local
+editor changes. Clock & transport only ignores these CCs. Existing primary knob
+messages and their high-resolution pairs are unchanged.

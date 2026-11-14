@@ -25,3 +25,9 @@ cc -std=c11 -Wall -Wextra -Werror -Icore core/synth.c tests/test_synth.c -o "$ta
 
 cc -std=c11 -Wall -Wextra -Werror -Icore core/machine_editor.c core/note_mask.c tests/test_machine_editor.c -o "$task_tmp/editor"
 "$task_tmp/editor"
+
+cc -std=c11 -Wall -Wextra -Werror -Icore core/panel_controls.c tests/test_panel_controls.c -o "$task_tmp/panel"
+"$task_tmp/panel"
+
+cc -std=c11 -Wall -Wextra -Werror -Icore core/secondary_controls.c tests/test_secondary_controls.c -o "$task_tmp/secondary"
+"$task_tmp/secondary"

@@ -123,6 +123,15 @@ try{
  clockOnly.checked=false;clockOnly.dispatchEvent(new Event('change'));
  port.onmidimessage({data:[0xb0,54,0]});assert(+d.getElementById('mutation0').value===255,'No stale fine CC after filter changes');
  port.onmidimessage({data:[0xb0,22,0]});assert(+d.getElementById('mutation0').value===0,'CC input resumes after filter disabled');
+ for(const bytes of packet.secondaryMessages)port.onmidimessage({data:bytes});
+ assert(d.getElementById('voiceSound0').value==='4'&&d.getElementById('voiceSound1').value==='2','Secondary sound CCs update selectors');
+ assert(d.getElementById('octave0').value==='5'&&d.getElementById('octave1').value==='4','Secondary octave CCs update selectors');
+ assert(d.getElementById('root0').value==='7'&&d.getElementById('root1').value==='7','Transpose updates both roots');
+ assert(JSON.parse(w.localStorage.getItem('midi-machines')).voices[0].root===7,'Secondary settings persist');
+ const rootInput=d.getElementById('root0');rootInput.value='2';rootInput.dispatchEvent(new Event('change'));
+ for(const bytes of packet.secondaryMessages)port.onmidimessage({data:bytes});
+ assert(rootInput.value==='2','Unchanged snapshots preserve pending editor changes');
+ clockOnly.checked=true;clockOnly.dispatchEvent(new Event('change'));port.onmidimessage({data:[0xb0,60,9]});assert(rootInput.value==='2','Clock-only ignores secondary CCs');clockOnly.checked=false;clockOnly.dispatchEvent(new Event('change'));
  assert(d.querySelectorAll('.machine').length===2,'Two panels');
  let settings=[0,3,0,0,100,0,0,3,1,1,100,0,16],staged=[];
  const hardwareOut={id:'pico-output',name:'Pico MIDI Machines MIDI 1',state:'connected',send(bytes){

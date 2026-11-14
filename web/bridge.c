@@ -1,5 +1,6 @@
 #include "machines_sequencer.h"
 #include "midi_controls.h"
+#include "secondary_controls.h"
 static turing_t engine=TURING_INIT;
 static transport_t transport={.division=1};
 static midi_controls_rx_t receiver;
@@ -23,3 +24,5 @@ void web_cc_reset(void){receiver.seen=0;}
 void web_subdivision(unsigned value){if(value==4||value==8||value==16)subdivision=value;}
 
 unsigned web_step_note(unsigned p,unsigned step){return turing_step_note(&engine,p,step);}
+
+unsigned web_secondary_cc(unsigned status,unsigned cc,unsigned data){unsigned control,value;if(!secondary_controls_receive(status,cc,data,&control,&value))return 0;return ((control+1)<<16)|value;}
