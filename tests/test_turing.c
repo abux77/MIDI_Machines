@@ -50,6 +50,18 @@ int main(void){
   transport_t clock={.division=division,.source=1,.running=true};unsigned due=0,beats=0;
   for(unsigned i=0;i<96*division;i++){machines_event_t e=machines_tick(&a,&clock);due+=e.due;beats+=e.beat;}assert(due==16);assert(beats==4);
  }
+ for(unsigned subdivision=4;subdivision<=16;subdivision*=2)for(unsigned source=0;source<=1;source++)for(unsigned division=1;division<=4;division*=2){
+  transport_t clock={.division=division,.source=source,.running=true};unsigned due=0,beats=0;
+  unsigned ticks=96*(source?division:1);
+  for(unsigned i=0;i<ticks;i++){machines_event_t event=machines_tick_subdivision(&a,&clock,subdivision);due+=event.due;beats+=event.beat;}
+  assert(due==subdivision);assert(beats==4);
+ }
  a=(turing_t)TURING_INIT;cycle(&a,10);uint16_t bits=a.machine[0].bits;turing_reset(&a);assert(a.machine[0].bits==bits);assert(a.machine[0].position==0);
+ /* Previewing fixed slots must not initialize, mutate or advance the engine. */
+ turing_t preview=TURING_INIT,unchanged=preview;
+ unsigned notes[16];for(unsigned i=0;i<16;i++)notes[i]=turing_step_note(&preview,0,i);
+ assert(!memcmp(&preview,&unchanged,sizeof preview));
+ preview.machine[0].mutation=255;preview.machine[0].length=16;
+ for(unsigned i=0;i<16;i++){turing_step(&preview);assert(preview.machine[0].note==notes[i]);assert(turing_step_note(&preview,0,i)==notes[i]);}
  puts("Turing: locks, inverted loops, lengths, quantization, RNG, sixteenth clock, reset passed");
 }

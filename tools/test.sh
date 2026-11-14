@@ -22,3 +22,6 @@ cc -std=c11 -Wall -Wextra -Werror -Icore core/turing.c core/transport.c core/mac
 
 cc -std=c11 -Wall -Wextra -Werror -Icore core/synth.c tests/test_synth.c -o "$task_tmp/synth"
 "$task_tmp/synth"
+
+cc -std=c11 -Wall -Wextra -Werror -Icore core/machine_editor.c core/note_mask.c tests/test_machine_editor.c -o "$task_tmp/editor"
+"$task_tmp/editor"

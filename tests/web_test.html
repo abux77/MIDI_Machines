@@ -1,18 +1,90 @@
 <!doctype html><html><head><meta charset="utf-8"></head><body><pre id="result">RUNNING</pre><iframe src="/web/"></iframe><script type="module">
 const result=document.getElementById('result'),assert=(v,m)=>{if(!v)throw Error(m);};
 try{
+ const {maskHits,maskPlays,maskPatterns}=await import('/web/note-mask.js?v=variations-1');
+ for(let length=1;length<=16;length++)for(let amount=0;amount<=100;amount++){
+  const pattern=Array.from({length},(_,step)=>maskPlays(step,length,amount));
+  assert(pattern.filter(Boolean).length===maskHits(length,amount),'Mask note count');
+  for(let loop=0;loop<3;loop++)assert(pattern.every((plays,step)=>plays===maskPlays(step,length,amount)),'Same mask every loop');
+ }
+ for(let length=1;length<=16;length++)for(let hits=0;hits<=length;hits++){
+  const amount=hits*100/length,patterns=maskPatterns(length,amount);
+  assert(new Set(patterns.map(pattern=>pattern.map(Number).join(''))).size===patterns.length,'Distinct variations');
+  assert(patterns.every(pattern=>pattern.filter(Boolean).length===hits),'Variation preserves note count');
+ }
+ const fifteen=maskPatterns(16,94);
+ assert(fifteen.length===16&&new Set(fifteen.map(pattern=>pattern.indexOf(false))).size===16,'Every single missing note available');
+ assert(maskPatterns(16,50).length>2,'Multiple arrangements at half density');
+ for(const [length,amount,variation,expected] of await(await fetch('/mask-fixtures.json')).json()){
+  let actual=0;for(let step=0;step<length;step++)if(maskPlays(step,length,amount,variation))actual|=1<<step;
+  assert(actual===expected,'Hardware/browser mask parity');
+ }
  const fixtures=await (await fetch('/native-fixtures.json')).json();
  const wasm=await (await fetch('/web/machines.wasm')).arrayBuffer();
  for(const f of fixtures){const {instance}=await WebAssembly.instantiate(wasm),e=instance.exports;f.params.forEach((v,c)=>e.web_control(c,v));e.web_division(f.division);f.external?e.web_receive(0xfa,0):e.web_start();
  for(const expected of f.events){const actual=[e.web_tick(),e.web_note(0),e.web_note(1),e.web_bits(0),e.web_bits(1)];assert(JSON.stringify(actual)===JSON.stringify(expected),'Native/WASM parity');}}
- const frame=document.querySelector('iframe');for(let i=0;i<100;i++){if(frame.contentDocument?.getElementById('status')?.textContent==='Ready')break;await new Promise(r=>setTimeout(r,50));}
- const d=frame.contentDocument,w=frame.contentWindow;assert(d.getElementById('status').textContent==='Ready','App loaded');
+ for(const subdivision of [4,8,16])for(const external of [false,true]){
+  const {instance}=await WebAssembly.instantiate(wasm),e=instance.exports;
+  e.web_subdivision(subdivision);external?e.web_receive(0xfa,0):e.web_start();
+  let steps=0,beats=0;for(let i=0;i<96;i++){const event=e.web_tick();steps+=event&1;beats+=(event>>1)&1;}
+  assert(steps===subdivision&&beats===4,'WASM subdivision '+subdivision+' external='+external);
+ }
+ const frame=document.querySelector('iframe');for(let i=0;i<100;i++){if(frame.contentDocument?.getElementById('start')?.disabled===false)break;await new Promise(r=>setTimeout(r,50));}
+ const d=frame.contentDocument,w=frame.contentWindow;assert(d.getElementById('start').disabled===false,'App loaded');
+ const subdivision=d.getElementById('subdivision');
+ for(const value of ['8','4','16']){subdivision.value=value;subdivision.dispatchEvent(new Event('change'));assert(JSON.parse(w.localStorage.getItem('midi-machines')).subdivision===+value,'Subdivision persistence '+value);}
  const sources=[],createSource=w.AudioContext.prototype.createBufferSource;w.AudioContext.prototype.createBufferSource=function(){const source=createSource.call(this);sources.push(source);return source;};
  d.getElementById('start').click();await new Promise(r=>setTimeout(r,450));assert(d.getElementById('status').textContent.startsWith('Playing'),'Start');assert(d.getElementById('note0').textContent!=='—','Synth and note display');assert(d.getElementById('note1').textContent!=='—','Both machines play');
  assert(sources.length>=2,'Sample voices started');
- assert(sources.every(s=>s.loop&&s.loopStart===0&&s.loopEnd===s.buffer.duration&&s.playbackRate.value>0),'Complete-cycle loops and pitch rates');
+ for(let p=0;p<2;p++){
+  const cells=d.querySelectorAll('#bits'+p+' .bit'),head=d.querySelector('#bits'+p+' .head');
+  assert(cells.length===16&&[...cells].every(cell=>cell.textContent.match(/^[A-G]/)),'Fixed note labels');
+  assert(head&&head.textContent===d.getElementById('note'+p).textContent,'Playhead labels actual played note');
+ }
+ const mutation0=d.getElementById('mutation0');mutation0.value=255;mutation0.dispatchEvent(new Event('input'));
+ await new Promise(r=>setTimeout(r,100));
+ const slots=[...d.querySelectorAll('#bits0 .bit')],lockedNotes=slots.map(cell=>cell.textContent);
+ await new Promise(r=>setTimeout(r,300));
+ assert(slots.every((cell,index)=>cell===d.querySelectorAll('#bits0 .bit')[index]&&cell.textContent===lockedNotes[index]),'Locked labels and cells stay in place');
+
+ assert(sources.every(s=>s.playbackRate.value>0)&&sources[0].loop&&!sources[1].loop,'Waveform loop and full recording playback');
  assert(sources[0].buffer!==sources[1].buffer,'Independent waveform choices');
- assert(d.getElementById('voiceSound0').options.length===4,'Four waveform choices');
+ d.getElementById('stop').click();
+ const probability0=d.getElementById('noteMask0'),probability1=d.getElementById('noteMask1');
+ assert(probability0.value==='100'&&probability1.value==='100','Mask defaults');
+ probability0.value='50';probability0.dispatchEvent(new Event('input'));
+ const maskLength=+d.getElementById('length0').value;
+ const maskPattern=[...d.querySelectorAll('#bits0 .bit')].map(cell=>cell.classList.contains('masked'));
+ assert(maskPattern.filter(Boolean).length===maskLength-maskHits(maskLength,50),'Masked steps visible');
+ await new Promise(r=>setTimeout(r,1100));
+ assert([...d.querySelectorAll('#bits0 .bit')].every((cell,i)=>cell.classList.contains('masked')===maskPattern[i]),'Visible mask stays fixed during playback');
+ probability0.value='100';probability0.dispatchEvent(new Event('input'));
+
+ const firstBuffer=sources[0].buffer,secondBuffer=sources[1].buffer;
+ for(const [muted,active] of [[probability0,probability1],[probability1,probability0]]){
+  muted.value='0';muted.dispatchEvent(new Event('input'));active.value='100';active.dispatchEvent(new Event('input'));
+  const start=sources.length;d.getElementById('start').click();await new Promise(r=>setTimeout(r,450));d.getElementById('stop').click();
+  const expected=active===probability0?firstBuffer:secondBuffer;
+  assert(sources.length>start&&sources.slice(start).every(source=>source.buffer===expected),'Independent 0/100 mask');
+  assert(JSON.parse(w.localStorage.getItem('midi-machines')).voices[muted===probability0?0:1].noteMask===0,'Mask persistence');
+ }
+ probability1.value='100';probability1.dispatchEvent(new Event('input'));
+ d.getElementById('start').click();await new Promise(r=>setTimeout(r,150));
+
+ assert(d.getElementById('voiceSound0').options.length===5,'Five retained sounds');
+ const {SampleSynth:RecordingSynth,wavesReady:recordingsReady,synthSamples:recordingMetadata}=await import('/web/synth.js?v=trimmed-sounds-1');
+ const recordingContext=new w.AudioContext(),recordingSynth=new RecordingSynth(recordingContext,await recordingsReady);
+ for(let index=1;index<5;index++){
+  const sample=recordingMetadata[index],at=recordingContext.currentTime+.01;
+  const source=recordingSynth.play(index,sample.rootNote,at,.05);
+  assert(!source.loop&&source.playbackRate.value===1,'Full recording at C root '+index);
+  assert(source.buffer.numberOfChannels===2,'Stereo recording '+index);
+  assert(Math.abs(source.buffer.duration-sample.frames/sample.sampleRate)<.00001,'Complete recording duration '+index);
+  assert(sample.rootNote%12===0,'C root metadata '+index);
+  source.stop(recordingContext.currentTime+.02);
+ }
+ await recordingContext.close();
+
  const sound=d.getElementById('voiceSound0');sound.value=3;sound.dispatchEvent(new Event('change'));
  assert(JSON.parse(w.localStorage.getItem('midi-machines')).voices[0].sound===3,'Sound persistence');
  const length0=d.getElementById('length0'),length1=d.getElementById('length1');
@@ -31,7 +103,8 @@ try{
  const screen=d.getElementById('screen');screen.checked=true;screen.dispatchEvent(new Event('change'));assert(d.getElementById('start').disabled,'Screen disables local start');
  // Feed a real C-encoded full-resolution knob snapshot through a mocked MIDI port.
  const packet=await(await fetch('/control-fixtures.json')).json();let port={id:'input',name:'Mock Pico',state:'connected'},out={id:'output',name:'Mock synth',state:'connected',messages:[],send(v){this.messages.push(v)},clear(){}};
- Object.defineProperty(w.navigator,'requestMIDIAccess',{configurable:true,value:async()=>({inputs:new Map([['input',port]]),outputs:new Map([['output',out]])})});
+ const midiAccess={inputs:new Map([['input',port]]),outputs:new Map([['output',out]])};
+ Object.defineProperty(w.navigator,'requestMIDIAccess',{configurable:true,value:async()=>midiAccess});
  d.getElementById('enableMidi').click();await new Promise(r=>setTimeout(r,50));const input=d.getElementById('midiIn');input.value='input';input.dispatchEvent(new Event('change'));await new Promise(r=>setTimeout(r,50));
  for(const bytes of packet.messages)for(let i=0;i<bytes.length;i+=3)port.onmidimessage({data:bytes.slice(i,i+3)});
  assert(+d.getElementById('mutation0').value===255,'Hardware BD mutation');assert(+d.getElementById('mutation1').value===0,'Hardware SD mutation');assert(+d.getElementById('tempo').value===137,'Hardware tempo');assert(out.messages.length===0,'Silent screen');
@@ -51,6 +124,24 @@ try{
  port.onmidimessage({data:[0xb0,54,0]});assert(+d.getElementById('mutation0').value===255,'No stale fine CC after filter changes');
  port.onmidimessage({data:[0xb0,22,0]});assert(+d.getElementById('mutation0').value===0,'CC input resumes after filter disabled');
  assert(d.querySelectorAll('.machine').length===2,'Two panels');
+ let settings=[0,3,0,0,100,0,0,3,1,1,100,0,16],staged=[];
+ const hardwareOut={id:'pico-output',name:'Pico MIDI Machines MIDI 1',state:'connected',send(bytes){
+  if(bytes[0]!==0xbf)return;
+  if(bytes[1]===119&&bytes[2]===3)staged=[];
+  if(bytes[1]>=80&&bytes[1]<=92)staged[bytes[1]-80]=bytes[2];
+  if(bytes[1]===119&&(bytes[2]===1||bytes[2]===2)){
+   if(bytes[2]===2)settings=[...staged];
+   for(const packet of [[0xbf,119,77],[0xbf,116,1],[0xbf,117,2],...settings.map((value,i)=>[0xbf,80+i,value]),[0xbf,119,78]])port.onmidimessage({data:packet});
+  }
+ }};
+ port.name=hardwareOut.name;midiAccess.outputs.set(hardwareOut.id,hardwareOut);midiAccess.onstatechange();
+ assert(!d.getElementById('readHardware').disabled,'Hardware read available');d.getElementById('readHardware').click();
+ assert(!d.getElementById('applyHardware').disabled,'Editor handshake accepted');
+ for(const [id,value] of [['root0',7],['octave0',4],['channel0',9],['voiceSound0',4]]){const el=d.getElementById(id);el.value=value;el.dispatchEvent(new Event('change'));}
+ d.getElementById('applyHardware').click();
+ assert(settings[0]===7&&settings[1]===4&&settings[2]===8&&settings[3]===4,'Hardware receives root octave channel and sound');
+ assert(d.getElementById('hardwareStatus').textContent.startsWith('Connected'),'Hardware editor acknowledgement');
+
  for(const width of [1100,390]){frame.style.width=width+'px';await new Promise(r=>setTimeout(r,80));assert(d.documentElement.scrollWidth<=frame.clientWidth,'Responsive width '+width);}
 
  result.textContent='PASS: native/WASM parity across 12 scenarios, browser synth/transport, persistence, hardware CCs, silent screen and actual MIDI pitch';

@@ -12,6 +12,8 @@
 #include "knob_filter.h"
 #include "storage.h"
 #include "audio.h"
+#include "machine_editor.h"
+#include "note_mask.h"
 bool usb_midi_enabled;
 static turing_t engine=TURING_INIT;
 static transport_t transport={.division=1};
@@ -52,9 +54,9 @@ static void release_notes(void){for(unsigned p=0;p<2;p++)if(held_notes&(1u<<p))n
 static void stop_sound(void){release_notes();audio_stop();for(unsigned p=0;p<4;p++){gpio_put(6+p,0);led_until[p]=0;}}
 static void tick(uint64_t now){
  if(gate_ticks&&!--gate_ticks)release_notes();
- machines_event_t event=machines_tick(&engine,&transport);
+ machines_event_t event=machines_tick_subdivision(&engine,&transport,machine_subdivision);
  if(event.beat){gpio_put(9,1);led_until[3]=now+35000;}
- if(event.due){release_notes();gate_ticks=5;for(unsigned p=0;p<2;p++)if(event.hits&(1u<<p)){note(p,100);held_notes|=1u<<p;gpio_put(6+p,1);led_until[p]=now+35000;}}
+ if(event.due){release_notes();gate_ticks=5;for(unsigned p=0;p<2;p++)if((event.hits&(1u<<p))&&(note_mask(engine.machine[p].length,machine_mask[p],machine_variation[p])&(1u<<((engine.machine[p].position+engine.machine[p].length-1)%engine.machine[p].length)))){note(p,100);held_notes|=1u<<p;gpio_put(6+p,1);led_until[p]=now+35000;}}
 }
 
 static void receive(unsigned source,uint8_t b,uint64_t now){
@@ -64,6 +66,29 @@ static void receive(unsigned source,uint8_t b,uint64_t now){
  if(b==0xfc)stop_sound();
  if(b!=0xf8||transport.running)realtime(b);
  if(b==0xf8&&transport.running)tick(now);
+}
+static machine_editor_t editor;
+static machine_settings_t editor_settings(void){
+ machine_settings_t settings={0};for(unsigned p=0;p<2;p++){unsigned b=p*6;settings.value[b]=machine_root[p];settings.value[b+1]=machine_octave[p];settings.value[b+2]=machine_channel[p];settings.value[b+3]=machine_sound[p];settings.value[b+4]=machine_mask[p];settings.value[b+5]=machine_variation[p];}settings.value[12]=machine_subdivision;return settings;
+}
+static void editor_send(const uint8_t bytes[3]){
+ if(!usb_midi_enabled||!tud_midi_mounted()||usb_head-usb_tail>=128)return;
+ uint8_t *packet=usb_queue[usb_head++&127];packet[0]=11;memcpy(packet+1,bytes,3);
+}
+static void editor_reply(void){
+ machine_settings_t settings=editor_settings();
+ uint8_t bytes[3]={0xbf,119,77};editor_send(bytes);
+ bytes[1]=116;bytes[2]=EDITOR_VERSION;editor_send(bytes);bytes[1]=117;bytes[2]=EDITOR_PALETTE;editor_send(bytes);
+ for(unsigned i=0;i<EDITOR_FIELDS;i++){bytes[1]=80+i;bytes[2]=settings.value[i];editor_send(bytes);}
+ bytes[1]=119;bytes[2]=78;editor_send(bytes);
+}
+static void editor_receive(unsigned status,unsigned cc,unsigned value){
+ if(storage_edit_active())return;
+ machine_settings_t settings=editor_settings();int action=machine_editor_receive(&editor,&settings,status,cc,value);
+ if(action==2){
+  stop_sound();for(unsigned p=0;p<2;p++){unsigned b=p*6;machine_root[p]=settings.value[b];machine_octave[p]=settings.value[b+1];machine_channel[p]=settings.value[b+2];machine_sound[p]=settings.value[b+3];machine_mask[p]=settings.value[b+4];machine_variation[p]=settings.value[b+5];}machine_subdivision=settings.value[12];apply_settings();
+ }
+ if(action)editor_reply();
 }
 static knob_filter_t knob_filters[7];
 static unsigned raw_pots[7];
@@ -172,14 +197,14 @@ int main(void){
  storage_init();settings_load();apply_settings();usb_midi_enabled=configured_usb_midi;
  tusb_init();stdio_init_all();audio_init();
  if(boot_storage){audio_suspend();if(storage_begin_edit())printf("Configuration drive active. Safely eject to reload.\n");else audio_resume();}
- printf("Pico MIDI Machines ready, stopped. DIN RX GP1. MIDI channel %u.\n",engine.machine[0].channel+1);
+ printf("Pico MIDI Machines editor v1, palette v2 ready, stopped. DIN RX GP1. MIDI channel %u.\n",engine.machine[0].channel+1);
  while(true){
   uint64_t now=time_us_64();audio_service();tud_task();
   while(uart_is_readable(uart0))receive(1,uart_getc(uart0),time_us_64());
   uint8_t packet[4];unsigned budget=32;
   while(usb_midi_enabled&&budget--&&tud_midi_packet_read(packet)){
-   /* Only realtime CIN; ignore notes, SysEx and other channel messages. */
    if((packet[0]&15)==15)receive(2,packet[1],time_us_64());
+   else if((packet[0]&15)==11)editor_receive(packet[1],packet[2],packet[3]);
   }
   output_service();console_service();storage_service_remount();
   if(test_note_until && time_us_64()>=test_note_until){release_notes();test_note_until=0;}

@@ -83,6 +83,7 @@ copy that file onto the hardware drive to apply them. Webpage settings do not
 write hardware flash over MIDI.
 
 ```text
+LIBRARY,2
 USB_MIDI,ON
 TM1,CH1,ROOT0,OCT3,SOUND1
 TM2,CH2,ROOT0,OCT3,SOUND2
@@ -137,30 +138,53 @@ This project derives from [MIDI Grids](https://github.com/abux77/MIDI_Grids).
 Turing behavior is inspired by [Music Thing Modular](https://www.musicthing.co.uk/Turing-Machine/).
 See [LICENSE.md](LICENSE.md) for inherited licensing and attribution.
 
-## Looped synth sounds
+## Sounds and hardware editor
 
-Each machine has a **Sound** selector: Bass, Mellow lead, Bright lead, Organ.
-Browser choices persist locally and are included in the downloaded CONFIG.TXT.
-For hardware, SOUND1–SOUND4 selects these sounds in that order; missing SOUND
-fields default to Bass for Machine 1 and Mellow lead for Machine 2. Copy the
-exported configuration to the hardware drive and safely eject to apply choices.
+The active palette is Bass, Gritty wide bass, Gritty 808 bass, Prophet wobble note,
+and Prophet wobbling key, in that order (SOUND1–SOUND5). Only Bass loops. The other
+four sounds play complete tuned recordings; a new note retriggers that machine's
+voice on the Pico. Stop silences all voices. The browser can overlap recordings.
 
-The four Adventure Kid WAVs in `samples/synth/` are mono PCM16, 600 frames each.
-Loop points cover the entire cycle, from frame 0 to frame 600 (exclusive), allowing
-sustained notes without running out of sample. Tuning uses each cycle's actual
-length and sample rate, not an assumed C3 root. Both platforms use a 5 ms attack,
-a short note gate, and a 20 ms release. Pico playback uses fixed-point phase
-accumulation and linear interpolation, mixing two voices at 44.1 kHz to stereo I²S.
-The browser uses looped Web Audio buffers of the same waveform data. Extreme
-upward transposition can alias; these initial waveforms are not multisampled.
+Browser recordings remain stereo at 44.1 kHz. Pico recordings are complete mono
+PCM16 at 22.05 kHz, interpolated into the existing 44.1 kHz stereo I²S stream.
+`tools/embed_hardware_synth.py` generates their flash tables from the tuned web
+assets. This firmware includes only three legacy factory drum files to leave
+space for the synth library. Existing files in the editable partition are retained.
+The four original CC0 waveforms remain archived in `samples/synth/`; user recordings
+have separate provenance and are not covered by that CC0 license.
 
-`tools/embed_synth.py` regenerates firmware waveform tables and browser assets.
-The WAVs are by Kristoffer Ekstrand / Adventure Kid, released under CC0-1.0.
-Source URLs are recorded in `samples/synth/manifest.json` and the complete license
-is in `samples/synth/LICENSE.md`.
+In the webpage, choose the Pico MIDI input, click **Read hardware**, edit each
+machine's Sound, Root, Octave, MIDI channel, Note mask and Mask variation, then
+click **Apply to hardware**. Subdivision applies to both machines. The editor
+uses a dedicated Pico output, independent of the musical MIDI output selector.
+A protocol/palette handshake is required before Apply is enabled. Updates apply
+in RAM and do not write flash while playing. They reset on reboot.
 
-## Proposed SPI input hardware
+To save across reboots, click **Download CONFIG.TXT**, copy it to the hardware's
+configuration drive, and safely eject. The exported format is:
 
-See [hardware/README.md](hardware/README.md) for the twelve-pot AD7490 / REF3125
-input-stage proposal, local datasheets, and JLCPCB BOM. The existing mux-based
-firmware and hardware pinout are unchanged.
+```text
+LIBRARY,2
+USB_MIDI,ON
+SUBDIV,16
+MASK1,100,0
+MASK2,100,0
+TM1,CH1,ROOT0,OCT3,SOUND1
+TM2,CH2,ROOT0,OCT3,SOUND2
+```
+
+MASK lines contain play density (0–100) and variation (0–63); the C firmware and
+browser use the same fixed pattern bank and rotations. LIBRARY,2 identifies the
+five-sound menu. Old configurations without that marker preserve Bass selections
+and replace removed starter sounds with the per-machine defaults.
+
+Editor protocol v1 uses channel 16 CC80–92 for two sets of root/octave/channel/
+sound/mask/variation and global subdivision. Channel and sound are zero based.
+CC119=1 requests state, 3 starts an update, and 2 commits all thirteen validated
+fields together. Replies begin CC119=77, include CC116=1 and CC117=2, send the
+thirteen fields, and end CC119=78. Replies are USB only. This is a private protocol
+for the Pico, not a general MIDI-controller assignment.
+
+`tools/bin_to_uf2.py build/midi_machines.bin build/midi_machines.uf2` wraps a linked
+RP2040 binary when picotool is unavailable. It rejects images larger than 1 MiB;
+the linker independently enforces the editable volume's boundary.

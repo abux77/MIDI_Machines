@@ -22,6 +22,14 @@ unsigned turing_quantize(unsigned n,unsigned root,unsigned scale){
  return n;
 }
 void turing_reset(turing_t *t){for(unsigned p=0;p<2;p++)t->machine[p].position=0;}
+unsigned turing_step_note(const turing_t *t,unsigned machine,unsigned step){
+ if(machine>=2||step>=16)return 0;
+ const turing_machine_t *m=&t->machine[machine];
+ uint16_t bits=m->steps[step];
+ if(!m->initialized){bits=m->bits;for(unsigned i=0;i<=step;i++)bits=(uint16_t)((bits<<1)|(bits>>15));}
+ unsigned base=12*(m->octave>8?8:m->octave)+m->root%12;
+ return turing_quantize(base+((bits&255)*t->range+127)/255,m->root,t->scale);
+}
 void turing_step(turing_t *t){
  for(unsigned p=0;p<2;p++){
   turing_machine_t *m=&t->machine[p];unsigned length=m->length;
@@ -44,9 +52,7 @@ void turing_step(turing_t *t){
    if((random32(t)>>24)<probability)flips|=1u<<bit;
   m->steps[step]^=flips;
   m->bits=m->steps[step];
-  unsigned base=12*(m->octave>8?8:m->octave)+m->root%12;
-  unsigned raw=base+((m->bits&255)*t->range+127)/255;
-  m->note=turing_quantize(raw,m->root,t->scale);
+  m->note=turing_step_note(t,p,step);
   m->position=(step+1)%length;
  }
 }

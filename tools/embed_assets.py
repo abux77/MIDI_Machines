@@ -21,6 +21,15 @@ for name in names:
 header='#pragma once\n#include <stdint.h>\n'
 for name in names:
     data=(ROOT/'samples'/f'{name}.WAV').read_bytes()
+    extra=not name.endswith('01')
+    if extra:header+='#ifndef MACHINES_COMPACT_FACTORY\n'
     header+=f'static const uint8_t factory_{name}[] = {{'+','.join(map(str,data))+'};\n'
-header+='typedef struct {const char *name; const uint8_t *data; unsigned size;} factory_t;\nstatic const factory_t factory[] = {\n'+',\n'.join(f'{{"{n}.WAV",factory_{n},sizeof(factory_{n})}}' for n in names)+'};\n'
+    if extra:header+='#endif\n'
+header+='typedef struct {const char *name; const uint8_t *data; unsigned size;} factory_t;\nstatic const factory_t factory[] = {\n'
+for name in names:
+    extra=not name.endswith('01')
+    if extra:header+='#ifndef MACHINES_COMPACT_FACTORY\n'
+    header+=f'{{"{name}.WAV",factory_{name},sizeof(factory_{name})}},\n'
+    if extra:header+='#endif\n'
+header+='};\n'
 (ROOT/'src/factory.h').write_text(header)

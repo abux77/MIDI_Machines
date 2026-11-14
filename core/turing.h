@@ -13,3 +13,6 @@ void turing_control(turing_t *t,unsigned control,unsigned value);
 void turing_reset(turing_t *t); /* Start resets the playhead, preserving the loop. */
 void turing_step(turing_t *t);
 unsigned turing_quantize(unsigned note,unsigned root,unsigned scale);
+
+/* Read a stored slot without advancing or mutating the pattern. */
+unsigned turing_step_note(const turing_t *t,unsigned machine,unsigned step);

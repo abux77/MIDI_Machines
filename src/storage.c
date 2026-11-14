@@ -47,8 +47,9 @@ DRESULT disk_ioctl(BYTE drive, BYTE command, void *buffer) {
 
 
 bool configured_usb_midi = true;
-static const char default_config[] = "USB_MIDI,ON\nTM1,CH1,ROOT0,OCT3,SOUND1\nTM2,CH2,ROOT0,OCT3,SOUND2\n";
+static const char default_config[] = "LIBRARY,2\nSUBDIV,16\nMASK1,100,0\nMASK2,100,0\nUSB_MIDI,ON\nTM1,CH1,ROOT0,OCT3,SOUND1\nTM2,CH2,ROOT0,OCT3,SOUND2\n";
 unsigned machine_sound[2]={0,1};
+unsigned machine_mask[2]={100,100},machine_variation[2]={0,0},machine_subdivision=16;
 unsigned machine_channel[2]={0,1}, machine_root[2]={0,0}, machine_octave[2]={3,3};
 static const char *drum_names[3] = {"BD", "SD", "HH"};
 unsigned drum_channel[3], drum_note[3] = {36,38,42}, selected_sample[3] = {1,1,1};
@@ -226,6 +227,8 @@ static bool read_line(FIL *file, char line[80]) {
 }
 void settings_load(void) {
     for(unsigned p=0;p<2;p++){machine_channel[p]=p;machine_root[p]=0;machine_octave[p]=3;machine_sound[p]=p;}
+    for(unsigned p=0;p<2;p++){machine_mask[p]=100;machine_variation[p]=0;}machine_subdivision=16;
+    bool current_library=false;
     configured_usb_midi = true;
     const unsigned defaults[3] = {36,38,42};
     for (unsigned p=0;p<3;p++) {drum_channel[p]=0;drum_note[p]=defaults[p];selected_sample[p]=1;available[p]=0;}
@@ -233,8 +236,11 @@ void settings_load(void) {
     FIL file; char line[80], name[3], extra; unsigned channel, note;
     if (f_open(&file,"CONFIG.TXT",FA_READ)==FR_OK) {
         while (read_line(&file,line)) {
-            unsigned machine, root, octave, sound;
-            if(sscanf(line,"TM%u,CH%u,ROOT%u,OCT%u,SOUND%u %c",&machine,&channel,&root,&octave,&sound,&extra)==5 && machine>=1 && machine<=2 && channel>=1 && channel<=16 && root<12 && octave<=8 && sound>=1 && sound<=4){
+            unsigned machine, root, octave, sound,amount,variation,subdivision;
+            if(!strcmp(line,"LIBRARY,2")){current_library=true;continue;}
+            if(sscanf(line,"SUBDIV,%u %c",&subdivision,&extra)==1&&(subdivision==4||subdivision==8||subdivision==16)){machine_subdivision=subdivision;continue;}
+            if(sscanf(line,"MASK%u,%u,%u %c",&machine,&amount,&variation,&extra)==3&&machine>=1&&machine<=2&&amount<=100&&variation<=63){machine_mask[machine-1]=amount;machine_variation[machine-1]=variation;continue;}
+            if(sscanf(line,"TM%u,CH%u,ROOT%u,OCT%u,SOUND%u %c",&machine,&channel,&root,&octave,&sound,&extra)==5 && machine>=1 && machine<=2 && channel>=1 && channel<=16 && root<12 && octave<=8 && sound>=1 && sound<=5){
                 machine_channel[machine-1]=channel-1;machine_root[machine-1]=root;machine_octave[machine-1]=octave;machine_sound[machine-1]=sound-1;continue;
             }
             if(sscanf(line,"TM%u,CH%u,ROOT%u,OCT%u %c",&machine,&channel,&root,&octave,&extra)==4 && machine>=1 && machine<=2 && channel>=1 && channel<=16 && root<12 && octave<=8){
@@ -247,6 +253,7 @@ void settings_load(void) {
         }
         f_close(&file);
     }
+    if(!current_library)for(unsigned p=0;p<2;p++)if(machine_sound[p])machine_sound[p]=p;
     if (f_open(&file,"SELECT.TXT",FA_READ)==FR_OK) {
         while (read_line(&file,line)) {
             unsigned number;

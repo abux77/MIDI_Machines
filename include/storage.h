@@ -26,4 +26,6 @@ void samples_report(void); /* Read-only serial diagnostics; no PCM reload. */
 
 extern unsigned machine_channel[2], machine_root[2], machine_octave[2];
 
-extern unsigned machine_sound[2]; /* 0..3, CC0 single-cycle library. */
+extern unsigned machine_sound[2]; /* Active five-sound palette. */
+
+extern unsigned machine_mask[2],machine_variation[2],machine_subdivision;

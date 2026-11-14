@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#151916"/>
-  <path fill="#d8ed9e" d="M5 5h6v6H5zm8 0h6v6h-6zm8 0h6v6h-6zM5 13h6v6H5zm8 0h6v6h-6zm8 0h6v6h-6zM5 21h6v6H5zm8 0h6v6h-6zm8 0h6v6h-6z"/>
+  <title>MIDI Machines</title>
+  <rect width="32" height="32" rx="5" fill="#25211f"/>
+  <path d="M5 24V8h3l4 7 4-7h3v16h-4V15l-3 5-3-5v9z" fill="#f3ecd9" transform="translate(-2 0) scale(.8 1)"/>
+  <path d="M5 24V8h3l4 7 4-7h3v16h-4V15l-3 5-3-5v9z" fill="#f3ecd9" transform="translate(14 0) scale(.8 1)"/>
 </svg>

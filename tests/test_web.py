@@ -31,7 +31,7 @@ with tempfile.TemporaryDirectory(prefix='midi-machines-test-') as temp:
     native = folder/'bridge.so'
     subprocess.run([compiler, '-shared', '-fPIC', '-std=c11', '-Wall', '-Wextra', '-Werror',
         '-I'+str(ROOT/'core'), *(str(ROOT/p) for p in ['core/turing.c','core/transport.c',
-        'core/machines_sequencer.c','core/midi_controls.c','web/bridge.c']), '-o', str(native)], check=True)
+        'core/machines_sequencer.c','core/midi_controls.c','core/note_mask.c','web/bridge.c']), '-o', str(native)], check=True)
     rng = random.Random(77)
     fixtures = []
     params = [[0]*6, [255]*6, [128,128,128,128,128,0]] + [[rng.randrange(256) for _ in range(6)] for _ in range(9)]
@@ -63,10 +63,12 @@ with tempfile.TemporaryDirectory(prefix='midi-machines-test-') as temp:
         count=control_lib.midi_controls_poll(ctypes.byref(state),index,value,100000,message)
         control_messages.append(list(message[:count]))
     control_fixture=dict(values=control_values,messages=control_messages)
+    control_lib.note_mask.restype=ctypes.c_uint16
+    mask_fixtures=[[length,amount,variation,control_lib.note_mask(length,amount,variation)] for length in [1,3,8,15,16] for amount in [0,25,50,75,94,100] for variation in range(64)]
     class Handler(http.server.SimpleHTTPRequestHandler):
         def do_GET(self):
-            if self.path in ('/native-fixtures.json','/control-fixtures.json'):
-                data = json.dumps(control_fixture if self.path == '/control-fixtures.json' else fixtures).encode()
+            if self.path in ('/native-fixtures.json','/control-fixtures.json','/mask-fixtures.json'):
+                data = json.dumps(mask_fixtures if self.path == '/mask-fixtures.json' else control_fixture if self.path == '/control-fixtures.json' else fixtures).encode()
                 self.send_response(200)
                 self.send_header('Content-Type','application/json')
                 self.send_header('Content-Length',str(len(data)))
