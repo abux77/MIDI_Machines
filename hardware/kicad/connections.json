@@ -1,0 +1,1478 @@
+[
+  {
+    "ref": "A1",
+    "pin": "1",
+    "net": "MIDI_TX_RESERVED",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "2",
+    "net": "MIDI_RX_RESERVED",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "3",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "4",
+    "net": "SPI_SCK",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "5",
+    "net": "SPI_MOSI",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "6",
+    "net": "SPI_MISO",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "7",
+    "net": "ADC_CS_N",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "8",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "9",
+    "net": "BUTTON1_LED",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "10",
+    "net": "BUTTON2_LED",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "13",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "14",
+    "net": "BUTTON1_N",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "15",
+    "net": "I2S_BCK_RESERVED",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "16",
+    "net": "I2S_LRCLK_RESERVED",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "17",
+    "net": "I2S_DATA_RESERVED",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "18",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "19",
+    "net": "BUTTON2_N",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "20",
+    "net": "DISPLAY_RST_N",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "40",
+    "net": "+5V_USB",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "38",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "36",
+    "net": "+3V3",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "33",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "29",
+    "net": "NEO_RAW",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "28",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "27",
+    "net": "I2C_SCL",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "26",
+    "net": "I2C_SDA",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "25",
+    "net": "AUX_GP19",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "24",
+    "net": "DISPLAY_DC",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "23",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "22",
+    "net": "DISPLAY_CS_N",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "A1",
+    "pin": "21",
+    "net": "AUX_GP16",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "13",
+    "net": "POT_1",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "12",
+    "net": "POT_2",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "11",
+    "net": "POT_3",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "10",
+    "net": "POT_4",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "9",
+    "net": "POT_5",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "8",
+    "net": "POT_6",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "7",
+    "net": "POT_7",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "6",
+    "net": "POT_8",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "5",
+    "net": "POT_9",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "3",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "1",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "28",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "27",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "26",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "25",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "20",
+    "net": "ADC_CS_N",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "16",
+    "net": "SPI_SCK",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "19",
+    "net": "SPI_MOSI",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "15",
+    "net": "SPI_MISO",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "23",
+    "net": "VREF_2V5",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "22",
+    "net": "+3V3",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "17",
+    "net": "+3V3",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "14",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "21",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "24",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "4",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U1",
+    "pin": "18",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U2",
+    "pin": "1",
+    "net": "+3V3",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U2",
+    "pin": "3",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U2",
+    "pin": "2",
+    "net": "VREF_2V5",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U3",
+    "pin": "2",
+    "net": "NEO_RAW",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U3",
+    "pin": "1",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U3",
+    "pin": "3",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U3",
+    "pin": "4",
+    "net": "NEO_SHIFTED",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "U3",
+    "pin": "5",
+    "net": "+5V_USB",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "R20",
+    "pin": "1",
+    "net": "NEO_SHIFTED",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "R20",
+    "pin": "2",
+    "net": "NEO_1_IN",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "R21",
+    "pin": "1",
+    "net": "NEO_RAW",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "R21",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "R22",
+    "pin": "1",
+    "net": "+3V3",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "R22",
+    "pin": "2",
+    "net": "ADC_CS_N",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "#FLG01",
+    "pin": "1",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C1",
+    "pin": "1",
+    "net": "+3V3",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C1",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C2",
+    "pin": "1",
+    "net": "VREF_2V5",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C2",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C3",
+    "pin": "1",
+    "net": "VREF_2V5",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C3",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C4",
+    "pin": "1",
+    "net": "+3V3",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C4",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C5",
+    "pin": "1",
+    "net": "+3V3",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C5",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C6",
+    "pin": "1",
+    "net": "+3V3",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C6",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C7",
+    "pin": "1",
+    "net": "+3V3",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C7",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C8",
+    "pin": "1",
+    "net": "+5V_USB",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C8",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C9",
+    "pin": "1",
+    "net": "+5V_USB",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "C9",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "MIDI_Machines_Control_Board"
+  },
+  {
+    "ref": "RV1",
+    "pin": "3",
+    "net": "VREF_2V5",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV1",
+    "pin": "1",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV1",
+    "pin": "2",
+    "net": "WIPER_1",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R1",
+    "pin": "1",
+    "net": "WIPER_1",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R1",
+    "pin": "2",
+    "net": "POT_1",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C11",
+    "pin": "1",
+    "net": "POT_1",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C11",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D1",
+    "pin": "3",
+    "net": "NEO_1_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D1",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D1",
+    "pin": "1",
+    "net": "NEO_2_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D1",
+    "pin": "4",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C21",
+    "pin": "1",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C21",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV2",
+    "pin": "3",
+    "net": "VREF_2V5",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV2",
+    "pin": "1",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV2",
+    "pin": "2",
+    "net": "WIPER_2",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R2",
+    "pin": "1",
+    "net": "WIPER_2",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R2",
+    "pin": "2",
+    "net": "POT_2",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C12",
+    "pin": "1",
+    "net": "POT_2",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C12",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D2",
+    "pin": "3",
+    "net": "NEO_2_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D2",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D2",
+    "pin": "1",
+    "net": "NEO_3_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D2",
+    "pin": "4",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C22",
+    "pin": "1",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C22",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV3",
+    "pin": "3",
+    "net": "VREF_2V5",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV3",
+    "pin": "1",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV3",
+    "pin": "2",
+    "net": "WIPER_3",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R3",
+    "pin": "1",
+    "net": "WIPER_3",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R3",
+    "pin": "2",
+    "net": "POT_3",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C13",
+    "pin": "1",
+    "net": "POT_3",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C13",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D3",
+    "pin": "3",
+    "net": "NEO_3_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D3",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D3",
+    "pin": "1",
+    "net": "NEO_4_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D3",
+    "pin": "4",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C23",
+    "pin": "1",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C23",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV4",
+    "pin": "3",
+    "net": "VREF_2V5",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV4",
+    "pin": "1",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV4",
+    "pin": "2",
+    "net": "WIPER_4",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R4",
+    "pin": "1",
+    "net": "WIPER_4",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R4",
+    "pin": "2",
+    "net": "POT_4",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C14",
+    "pin": "1",
+    "net": "POT_4",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C14",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D4",
+    "pin": "3",
+    "net": "NEO_4_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D4",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D4",
+    "pin": "1",
+    "net": "NEO_5_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D4",
+    "pin": "4",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C24",
+    "pin": "1",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C24",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV5",
+    "pin": "3",
+    "net": "VREF_2V5",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV5",
+    "pin": "1",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV5",
+    "pin": "2",
+    "net": "WIPER_5",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R5",
+    "pin": "1",
+    "net": "WIPER_5",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R5",
+    "pin": "2",
+    "net": "POT_5",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C15",
+    "pin": "1",
+    "net": "POT_5",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C15",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D5",
+    "pin": "3",
+    "net": "NEO_5_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D5",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D5",
+    "pin": "1",
+    "net": "NEO_6_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D5",
+    "pin": "4",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C25",
+    "pin": "1",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C25",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV6",
+    "pin": "3",
+    "net": "VREF_2V5",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV6",
+    "pin": "1",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV6",
+    "pin": "2",
+    "net": "WIPER_6",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R6",
+    "pin": "1",
+    "net": "WIPER_6",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R6",
+    "pin": "2",
+    "net": "POT_6",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C16",
+    "pin": "1",
+    "net": "POT_6",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C16",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D6",
+    "pin": "3",
+    "net": "NEO_6_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D6",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D6",
+    "pin": "1",
+    "net": "NEO_7_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D6",
+    "pin": "4",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C26",
+    "pin": "1",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C26",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV7",
+    "pin": "3",
+    "net": "VREF_2V5",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV7",
+    "pin": "1",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV7",
+    "pin": "2",
+    "net": "WIPER_7",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R7",
+    "pin": "1",
+    "net": "WIPER_7",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R7",
+    "pin": "2",
+    "net": "POT_7",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C17",
+    "pin": "1",
+    "net": "POT_7",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C17",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D7",
+    "pin": "3",
+    "net": "NEO_7_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D7",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D7",
+    "pin": "1",
+    "net": "NEO_8_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D7",
+    "pin": "4",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C27",
+    "pin": "1",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C27",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV8",
+    "pin": "3",
+    "net": "VREF_2V5",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV8",
+    "pin": "1",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV8",
+    "pin": "2",
+    "net": "WIPER_8",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R8",
+    "pin": "1",
+    "net": "WIPER_8",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R8",
+    "pin": "2",
+    "net": "POT_8",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C18",
+    "pin": "1",
+    "net": "POT_8",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C18",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D8",
+    "pin": "3",
+    "net": "NEO_8_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D8",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D8",
+    "pin": "1",
+    "net": "NEO_9_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D8",
+    "pin": "4",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C28",
+    "pin": "1",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C28",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV9",
+    "pin": "3",
+    "net": "VREF_2V5",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV9",
+    "pin": "1",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "RV9",
+    "pin": "2",
+    "net": "WIPER_9",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R9",
+    "pin": "1",
+    "net": "WIPER_9",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "R9",
+    "pin": "2",
+    "net": "POT_9",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C19",
+    "pin": "1",
+    "net": "POT_9",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C19",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D9",
+    "pin": "3",
+    "net": "NEO_9_IN",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D9",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "D9",
+    "pin": "4",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C29",
+    "pin": "1",
+    "net": "+5V_USB",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "C29",
+    "pin": "2",
+    "net": "GND",
+    "sheet": "Controls"
+  },
+  {
+    "ref": "SW1",
+    "pin": "COM_A",
+    "net": "GND",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "SW1",
+    "pin": "COM_B",
+    "net": "GND",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "SW1",
+    "pin": "NO",
+    "net": "BUTTON1_N",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "SW1",
+    "pin": "LED_A",
+    "net": "BUTTON1_ANODE",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "SW1",
+    "pin": "LED_K",
+    "net": "GND",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "R31",
+    "pin": "1",
+    "net": "+3V3",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "R31",
+    "pin": "2",
+    "net": "BUTTON1_N",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "R33",
+    "pin": "1",
+    "net": "BUTTON1_LED",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "R33",
+    "pin": "2",
+    "net": "BUTTON1_ANODE",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "SW2",
+    "pin": "COM_A",
+    "net": "GND",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "SW2",
+    "pin": "COM_B",
+    "net": "GND",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "SW2",
+    "pin": "NO",
+    "net": "BUTTON2_N",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "SW2",
+    "pin": "LED_A",
+    "net": "BUTTON2_ANODE",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "SW2",
+    "pin": "LED_K",
+    "net": "GND",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "R32",
+    "pin": "1",
+    "net": "+3V3",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "R32",
+    "pin": "2",
+    "net": "BUTTON2_N",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "R34",
+    "pin": "1",
+    "net": "BUTTON2_LED",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "R34",
+    "pin": "2",
+    "net": "BUTTON2_ANODE",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J1",
+    "pin": "1",
+    "net": "GND",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J1",
+    "pin": "2",
+    "net": "+3V3",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J1",
+    "pin": "3",
+    "net": "I2C_SDA",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J1",
+    "pin": "4",
+    "net": "I2C_SCL",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J2",
+    "pin": "1",
+    "net": "GND",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J2",
+    "pin": "2",
+    "net": "+3V3",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J2",
+    "pin": "3",
+    "net": "SPI_SCK",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J2",
+    "pin": "4",
+    "net": "SPI_MOSI",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J2",
+    "pin": "5",
+    "net": "SPI_MISO",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J2",
+    "pin": "6",
+    "net": "DISPLAY_CS_N",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J2",
+    "pin": "7",
+    "net": "DISPLAY_DC",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J2",
+    "pin": "8",
+    "net": "DISPLAY_RST_N",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J3",
+    "pin": "1",
+    "net": "GND",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J3",
+    "pin": "2",
+    "net": "MIDI_TX_RESERVED",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J3",
+    "pin": "3",
+    "net": "MIDI_RX_RESERVED",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J3",
+    "pin": "4",
+    "net": "I2S_BCK_RESERVED",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J3",
+    "pin": "5",
+    "net": "I2S_LRCLK_RESERVED",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J3",
+    "pin": "6",
+    "net": "I2S_DATA_RESERVED",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J3",
+    "pin": "7",
+    "net": "AUX_GP16",
+    "sheet": "Buttons_Display"
+  },
+  {
+    "ref": "J3",
+    "pin": "8",
+    "net": "AUX_GP19",
+    "sheet": "Buttons_Display"
+  }
+]

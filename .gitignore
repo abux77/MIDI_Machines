@@ -4,3 +4,9 @@ __pycache__/
 /.vscode/
 /samples-converted/
 *.pyc
+
+# KiCad per-user state and recovery files
+*.kicad_prl
+*.lck
+*.kicad_sch-bak
+*-backups/

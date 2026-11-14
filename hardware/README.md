@@ -1,3 +1,5 @@
+> **Current control-board draft:** [KiCad project and schematic](kicad/README.md) now use nine pots in a 3 × 3 grid, nine NeoPixels and two illuminated buttons, with future display headers. The twelve-input BOMs below remain the earlier ADC-stage proposal. Use `kicad/BOM_DRAFT.csv` for the new schematic.
+
 # Twelve-pot SPI ADC hardware proposal
 
 Proposed next-board input circuit for MIDI Machines, also suitable for MIDI Grids.

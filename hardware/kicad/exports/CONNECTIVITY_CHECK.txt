@@ -1,0 +1,2 @@
+PASS: nine filtered pots, nine chained pixels, two illuminated buttons, ADC pinout, power separation, Pico SPI and display headers.
+This verifies schematic connectivity, not physical footprints, component ratings or hardware operation.

@@ -1,0 +1,163 @@
+ERC report (2026-11-14T14:12:12, Encoding UTF8)
+Report includes: Errors, Warnings
+
+***** Sheet /
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(27.94 mm, 218.44 mm): Symbol C1 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Module'
+    ; warning
+    @(66.04 mm, 97.79 mm): Symbol A1 [RaspberryPi_Pico]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(71.12 mm, 218.44 mm): Symbol C2 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(114.30 mm, 218.44 mm): Symbol C3 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(157.48 mm, 218.44 mm): Symbol C4 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(200.66 mm, 218.44 mm): Symbol C5 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Package_SO'
+    ; warning
+    @(203.20 mm, 95.25 mm): Symbol U1 [AD7490BRUZ]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(243.84 mm, 218.44 mm): Symbol C6 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(254.00 mm, 154.94 mm): Symbol R22 [R_V]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(287.02 mm, 218.44 mm): Symbol C7 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(309.88 mm, 154.94 mm): Symbol R21 [R_V]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(330.20 mm, 218.44 mm): Symbol C8 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Package_TO_SOT_SMD'
+    ; warning
+    @(335.28 mm, 60.96 mm): Symbol U2 [REF3125]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Package_TO_SOT_SMD'
+    ; warning
+    @(335.28 mm, 115.57 mm): Symbol U3 [SN74AHCT1G125]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(365.76 mm, 139.70 mm): Symbol R20 [R]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(66.04 mm, 68.58 mm): Symbol R1 [R]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(66.04 mm, 142.24 mm): Symbol R4 [R]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(66.04 mm, 215.90 mm): Symbol R7 [R]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(81.28 mm, 88.90 mm): Symbol C11 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(81.28 mm, 162.56 mm): Symbol C14 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(81.28 mm, 236.22 mm): Symbol C17 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(137.16 mm, 88.90 mm): Symbol C21 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(137.16 mm, 162.56 mm): Symbol C24 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(137.16 mm, 236.22 mm): Symbol C27 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(193.04 mm, 68.58 mm): Symbol R2 [R]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(193.04 mm, 142.24 mm): Symbol R5 [R]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(193.04 mm, 215.90 mm): Symbol R8 [R]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(208.28 mm, 88.90 mm): Symbol C12 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(208.28 mm, 162.56 mm): Symbol C15 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(208.28 mm, 236.22 mm): Symbol C18 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(264.16 mm, 88.90 mm): Symbol C22 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(264.16 mm, 162.56 mm): Symbol C25 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(264.16 mm, 236.22 mm): Symbol C28 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(320.04 mm, 68.58 mm): Symbol R3 [R]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(320.04 mm, 142.24 mm): Symbol R6 [R]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(320.04 mm, 215.90 mm): Symbol R9 [R]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(335.28 mm, 88.90 mm): Symbol C13 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(335.28 mm, 162.56 mm): Symbol C16 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(335.28 mm, 236.22 mm): Symbol C19 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(391.16 mm, 88.90 mm): Symbol C23 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(391.16 mm, 162.56 mm): Symbol C26 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Capacitor_SMD'
+    ; warning
+    @(391.16 mm, 236.22 mm): Symbol C29 [C]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(50.80 mm, 106.68 mm): Symbol R31 [R_V]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Connector_PinHeader_2.54mm'
+    ; warning
+    @(63.50 mm, 200.66 mm): Symbol J1 [Header4]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(93.98 mm, 106.68 mm): Symbol R33 [R]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Connector_PinHeader_2.54mm'
+    ; warning
+    @(190.50 mm, 201.93 mm): Symbol J2 [Header8]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(210.82 mm, 106.68 mm): Symbol R32 [R_V]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Resistor_SMD'
+    ; warning
+    @(254.00 mm, 106.68 mm): Symbol R34 [R]
+[footprint_link_issues]: The current configuration does not include the footprint library 'Connector_PinHeader_2.54mm'
+    ; warning
+    @(335.28 mm, 201.93 mm): Symbol J3 [Header8]
+
+***** Sheet /3 x 3 illuminated controls/
+
+***** Sheet /Two buttons + display reservations/
+
+ ** ERC messages: 49  Errors 0  Warnings 49
+
+ ** Ignored checks:
+    - Global label only appears once in the schematic
+    - Four connection points are joined together
+    - SPICE model issue
+    - Assigned footprint doesn't match footprint filters
